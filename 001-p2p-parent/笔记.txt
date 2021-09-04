@@ -1,0 +1,3269 @@
+﻿讲义第一章属于了解内容
+
+p2p-001-互联网金融模式
+		1. 第二章：商业模式
+				p2p 是一个 个人对个人的 投资理财平台
+				类似与房地产中介
+				
+			** 我们要实现的是左半部分的实现， 就业是理财
+			
+p2p-002-网贷平台的构成
+		2.2.1 理财端
+		2.2.2 借款端
+		
+		** 我们实现理财端的 PC电脑部分
+		
+p2p-003-项目基本开发流程-1
+		2.3 项目开发流程
+		
+	
+	
+
+p2p-004-项目基本开发流程-2
+		软件开发工程师在岗位中的位置
+		与其他岗位的关系
+		*** 项目经理职位不比程序员高 本章重点!
+		
+p2p-005-项目基本开发流程-3		
+		工作技巧
+				1. 产品经理提需求，尽可能发邮件
+				2. 测试用例，由测试人员口头通知或发送excel或者是bug系统反馈bug
+
+p2p-006-动力金融网技术选型及开发工具
+		1. 如果以后用到前口段分离的项目，前段完全不归我们管
+		2. HttpComponents : 用于 不同的系统与系统之间的数据交互或方法调用，与dubbo不同，dubbo只是公司内部各个工程的方法调用
+		3. 依赖管理除了maven 还有 Gradle，与maven使用类似
+		4. DIEA
+		
+p2p-007-讲解使用的数据库表-1
+			1. 在tools中找到PowerDesigner165并安装
+			2. 使用 PowerDesigner165打开P2P-bak.pdm文件
+			
+			3. 表
+					每一张表都有一个主键（主键的特点：往往也与业务没有关系），并且自增、如果一个表中没有主键，则说明是无效的表
+				
+					用户表：
+							1. 字段
+							2. 其中用户姓名和身份证号，这两个字段，需要调用第三方接口后才能加上数据
+							3. 用户财务资金账户表(并不是真正的钱，算是一张虚拟表)
+									新用户注册后可能会直接赠送888的红包
+									
+p2p-008-讲解使用的数据库表-2
+			1. 投标产品信息表
+						可参考xiaoniu88.com
+						只有单笔最大投资金额限制，没有总额限制
+						版本号：为了防止多线程高并发出现的超卖现象设计的字段
+				
+				
+p2p-009-讲解使用的数据库表-3
+			1. 用户投资信息表
+			2. 用户收益记录表
+					收益时间： 满标时间+投资周期
+					
+					 
+p2p-010-讲解使用的数据库表-4
+			1. 用户充值记录表
+				 字段
+				 真实开发是依赖第三方的
+				 
+				 
+p2p-011-讲解使用的数据库表-5			
+			根据主键查看表与表之间的关系
+			
+
+
+p2p-012-讲解使用的数据库表-6
+			六张表表名的特点以及字段信息
+			
+p2p-013-搭建项目-1
+		1. 新建一个空文件夹命名为：IDEA-p2p-springboot
+		2. 新建一个空的project 选择的目录就是上面创建的IDEA-p2p-springboot
+		
+		1. 创建工程
+				1. 001-p2p-parent  父工程  可以选择使用SpringBoot的web工程
+							***父工程必须遵循如下两个特点：
+								1. packaging标签的文本内容必须是pom
+								2. 删除src目录
+							另外：
+									我们可以先删除所有的依赖标签
+									
+				2. 002-p2p-common 用于存放工具类、常量类、等 maven java工程
+				3. 003-p2p-exterface 接口工程 用于存放接口和实体类  maven java工程
+				4. 004-p2p-dataservice 服务提供者 SpringBoot web
+				5. 005-p2p-web 服务消费者  SpringBoot web
+				
+				**** 项目的包名统一采用 com.bjpowernode.p2p
+				
+				
+		2. 删除服务提供者和服务消费者工程中的测试起步依赖，并同时删除测试包
+		
+p2p-014-搭建项目-2
+			1. 开启linux的mysql服务，
+			   创建数据库名为p2p 字符集编码是utf8  排序规则默认
+			使用远程工具执行init-p2p-data-mysql-bak.sql文件生成数据库和表
+
+			
+p2p-015-搭建项目-3-逆向工程
+			1. 修改逆向工程文件
+						同时添加逆向工程所需要的插件
+					1.1 修改实体类生成的位置
+					1.2 修改生成类的包名
+					1.3 修改表对应的实体类
+					
+			2. 生成之前最好在004服务提供者pom文件中添加接口工程的依赖，但是需要删除本地仓库之前的jar包，重新生成。同时也生成父工程的jar
+
+			3. 使用逆向工程生成实体类和mapper
+				
+p2p-016-搭建项目-4
+			1. 对项目结构进行进一步的细分
+						创建user 用户业务
+							 loan  理财业务
+							 
+			2. 项目规则
+					1. 包名：
+						实体类:com.bjpowernode.p2p.model.user|loan
+						数据持久层: com.bjpowernode.p2p.mapper.user|loan
+						业务层:com.bjpowernode.p2p.service/biz.user|loan
+						控制层:com.bjpowernode.p2p.web/controller
+						
+
+p2p-017-搭建项目-5
+		1. readme.txt
+				分析004-p2p-dataservice 
+						1. 服务提供者工程需要添加的依赖
+								继承Mybatis dubbo redis
+										添加依赖: mybatis依赖 mysql依赖 dubbo依赖 zookeeper依赖、redis依赖 Apache Common依赖
+						2. 设置端口号8081和上下文根/
+						
+						<!--Mybatis 集成 SrpingBoot的依赖-->
+						<dependency>
+							<groupId>org.mybatis.spring.boot</groupId>
+							<artifactId>mybatis-spring-boot-starter</artifactId>
+							<version>2.0.0</version>
+						</dependency>
+
+						<!--MySql 驱动依赖-->
+						<dependency>
+							<groupId>mysql</groupId>
+							<artifactId>mysql-connector-java</artifactId>
+						</dependency>
+
+						<!--Dubbo -->
+						<dependency>
+							<groupId>com.alibaba.spring.boot</groupId>
+							<artifactId>dubbo-spring-boot-starter</artifactId>
+							<version>2.0.0</version>
+						</dependency>
+
+						<!--zookeeper-->
+						<dependency>
+							<groupId>com.101tec</groupId>
+							<artifactId>zkClient</artifactId>
+							<version>0.10</version>
+						</dependency>
+
+						<!--redis-->
+						<dependency>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-starter-data-redis</artifactId>
+						</dependency>
+
+						<!--Apache Common依赖-->
+						<dependency>
+							<groupId>org.apache.commons</groupId>
+							<artifactId>commons-lang3</artifactId>
+						</dependency>
+						
+				
+p2p-018-搭建项目-6						
+			1. 将服务提供者和服务消费工程的父工程更换成001-p2p-parent工程
+					同时子工程不在需要groupId和version了，删掉
+			2. 子工程换了爸爸以后，版本号的管理可以不在由自己管理了，删除吧，删除掉了就行了。
+			
+p2p-019-搭建项目-7
+			1. 将004-p2p-dataservice中的没有被管理过的依赖的版本号交给父工程管理
+			
+						
+p2p-020-搭建项目-8
+			reademe.txt
+			p2p-web
+				1. SpringBoot的wen项目
+				2. Dubbot分布式框架服务消费者
+				3. 继承的依赖
+						SpringMVC Thymeleaf Dubbo zookeeper Apache Commons 接口工程
+				4. 当前工程是唯一的用户可以直接访问的工程
+					<!--Dubbo -->
+					<dependency>
+						<groupId>com.alibaba.spring.boot</groupId>
+						<artifactId>dubbo-spring-boot-starter</artifactId>
+					</dependency>
+
+					<!--zookeeper-->
+					<dependency>
+						<groupId>com.101tec</groupId>
+						<artifactId>zkClient</artifactId>
+					</dependency>
+					
+					<!--Apache Common依赖-->
+					<dependency>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-lang3</artifactId>
+					</dependency>
+
+					<!--接口工程-->
+					<dependency>
+						<groupId>com.bjpowernode.p2p</groupId>
+						<artifactId>003-p2p-exterface</artifactId>
+						<version>1.0.0</version>
+					</dependency>
+	
+						
+p2p-021-搭建项目-9
+		1. 配置服务提供者工程的核心配置文件
+				1. 多环境配置文件 创建application-dev.properties文件
+						spring.profiles.active=dev激活开发者环境的配置文件
+				2. 配置内容
+					# 设置内置tomcat的端口号
+						server.port=8081
+						server.servlet.context-path=/
+
+						# mysql数据库连接
+						spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+						spring.datasource.url=jdbc:mysql://localhost:3306/p2p?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+						spring.datasource.username=root
+						spring.datasource.password=root
+
+						# dubbo设置
+						spring.application.name=p2p-dataservice
+						spring.dubbo.server=true
+						spring.dubbo.registry=zookeeper://192.168.1.106:2181
+
+						# redis设置
+						spring.redis.host=192.168.1.106
+						spring.redis.port=6379
+						
+p2p-022-搭建项目-10
+			1. 配置服务消费者的核心配置文件
+				 创建开发环境的配置文件，并在主配置文件中激活
+			2. 配置内容
+				# 设置内置tomcat端口号
+				server.port=8080
+				server.servlet.context-path=/p2p
+				
+				# 关闭缓存
+				spring.thymeleaf.cache=false
+
+				# 配置dubbo
+				spring.application.name=p2p-web
+				spring.dubbo.registry=zookeeper://192.168.1.106:2181
+
+				# 设置thymeleaf(默认、可选)
+				spring.thymeleaf.prefix=classpath:/templates/
+				spring.thymeleaf.suffix=.html
+
+				# 设置编码格式
+				server.servlet.encoding.enabled=true
+				server.servlet.encoding.force=true
+				server.servlet.encoding.charset=utf-8
+						
+						
+p2p-023-搭建项目-11		
+			1. 在服务消费者中添加 web.IndexController
+						@Controller
+						public class IndexController {
+
+							@RequestMapping("/index")
+							public String toIndex() {
+								return "index";
+							}
+						}
+
+			2. 将资料002-页面资源中的页面以及静态资源复制到项目的相关文件夹中
+			3. 注意：新添加资源后需要重写clean项目
+			
+p2p-024-展示首页面-功能分析-1			
+			1. 页面可以分为 头部 和 脚部， 属于公共的内容，所有可以单独抽取出来
+			2. 一般情况下，轮播图的数据也来自于cms(广告系统)，但是当前p2p项目是写死的
+			3. 实力雄厚等都是死数据
+			4. 产品分类
+			5. 我们需要从后台查询 收益率、平台用户数、累计成交金额 以及产品信息
+			
+p2p-025-展示首页面-功能分析-2
+			1. 基于当前页面的功能，我们需要从数据库查询出相关数据并显示出来
+					那么首页显示的这些数据，从控制层到业务层需要调用几次方法?
+			2. 可以调用一次，然后查询出所有的数据，也可以一次一次的查询
+			3. 以后工作后，先实现再优化
+			
+p2p-026-展示首页面-功能分析-3
+			1. IndexController的toIndex()方法中需要实现的业务
+				// 获取平台历史年化收益率
+
+				// 获取平台注册人数
+
+				// 获取平台累计成交金额
+
+				// 获取新手宝产品
+
+				// 获取优选产品
+
+				// 获取散标产品
+				
+			2. 简单分析 平台历史年化收益率 应该查哪个表？
+					根据投标产品信息表中产品的利率的平均值
+					
+					
+p2p-027-项目命名规则
+		方法命名的规则:
+		方法类型					业务层(Service)					数据持久层(直接参考mapper类命名)
+			新增					 add*								intert*
+			删除					 remove*							delete*
+			修改					 modify|edit*						update
+			查询					 query|find*						select*
+		
+		如果方法中同时涉及到了增删改查，那么方法名称则以业务来命名
+		
+		2. 补全IndexController的查询平台产品历史年化收益率的方法
+				@Controller
+				public class IndexController {
+
+					private LoanInfoService loanInfoService;
+
+					@RequestMapping("/index")
+					public String toIndex(Model model) {
+						// 获取平台历史年化收益率
+						Double histryAvgRete = loanInfoService.queryhistoryAvgRate();
+						model.addAttribute("histryAvgRete",histryAvgRete);
+						// 获取平台注册人数
+
+						// 获取平台累计成交金额
+
+						// 获取新手包产品
+
+						// 获取优选产品
+
+						// 获取散标产品
+
+						return "index";
+					}
+				}
+			
+p2p-028-展示首页面-功能实现-1
+			1. 创建LoanInfoService接口和实现类
+			2. 并且在实现类中调用mapper的相关方法
+			3. 注意服务提供者和消费的注解
+			4. 在服务提供者和服务消费者入口类上面加上注解
+					 服务提供者启动类:
+					@EnableDubboConfiguration // 开启dubbo配置
+					@MapperScan(basePackages = "com.bjpowernode.p2p.mapper")
+	
+					服务消费者的启动类
+							@EnableDubboConfiguration  // 开启dubbo配置
+							
+			4. 把mapper.xml等编译到resources中
+					pom.xml
+						 <resources>
+							<resource>
+								<directory>src/main/java </directory>
+								<includes>
+									<include>**/*.xml</include>
+								</includes>
+							</resource>
+
+							
+						
+						
+p2p-029-展示首页面-功能实现-2
+				1. 分别启动服务提供者工程和消费者工程
+				2. 通过断点查看方法执行是否正确，是否返回历史平均年化收益率
+						5.344736842105266
+						需要修改sql查语句
+						cast(表达式 as 强制转换类型)
+						select cast(avg(rate) as decimal(10,2)) from b_loan_info;
+						
+p2p-030-展示首页面-功能优化分析
+			1. 历史平均年化收益率会经常的被查询，所有我们可以进行优化
+				优化的规则：
+					将该值直接存放到redis缓存中，用户进入到首页后就可以首先去redis的缓存中查询
+					逻辑：
+							如果redis中有，则直接从redis中获取
+							如果redis中没有，那么从数据库中查询，并且将数据再存到redis缓存中
+						
+			2. 一些采用redis缓存的业务
+						如： 天猫、京东 等 产品分类这些数据，都是很少变动的，一定是存储到redis中的
+
+p2p-031-展示首页面-功能优化-1			
+			1. 实现代码(注意：在接口的实现类中实现LoanInfoServiceImpl)：
+				@Autowired
+					private RedisTemplate<Object,Object> redisTemplate;
+
+					@Override
+					public Double queryhistoryAvgRate() {
+						//将该值直接存放到redis缓存中，用户进入到首页后就可以首先去redis的缓存中查询
+						//逻辑：
+						//如果redis中有，则直接从redis中获取
+						//如果redis中没有，那么从数据库中查询，并且将数据再存到redis缓存中
+						Double historyAvgRate = (Double)redisTemplate.opsForValue().get("historyAvgRate");
+						if (!ObjectUtils.allNotNull(historyAvgRate)) {
+							// 从数据库中获取
+							historyAvgRate = loanInfoMapper.selecthistoryAvgRate();
+							redisTemplate.opsForValue().set("historyAvgRate",historyAvgRate,15, TimeUnit.DAYS);
+						}
+						return historyAvgRate;
+					}
+					*** 注意：要给redis中的value指定一个保存数据的时间，否则就会永久保存，跟把数据写死没有任何区别了
+			2. 验证			
+			
+			
+					
+p2p-032-展示首页面-功能优化-2				
+			上面的案例中，我们多出用到了一个常量:historyAvgRate 如果有一个地方写错了，那么就会导致我们的程序无法运行
+			如何解决？
+				在002-p2p-common工程中添加一个专门存放常量的类 Constants
+					在Contants类中创建常量  com.p2p.bjpowernode.common
+			**** 注意：要在服务提供者和服务消费者中引入工具(002-p2p-common)工程		
+
+p2p-033-展示首页面-功能优化-3
+			目前，我们通过redis远程工具，在查看redis中数据的时候，可读性并不是很好
+			打开源码，查看Redis的序列化方式
+				 public void setKeySerializer(RedisSerializer<?> serializer) {
+				this.keySerializer = serializer;
+				}
+			RedisSerializer接口有个实现类是：StringRedisSerializer
+				如果想让我们的数据可读性更好，可以在使用redis存数据之前，先设置
+					// 重新设置redis的序列化方式
+				redisTemplate.setKeySerializer(new StringRedisSerializer());
+				***注意：我们只能对String类型的值进行转换
+				
+				
+p2p-034-展示首页面-解决缓存击穿-1
+		1. 正常情况下，我们从redis中获取数据没有任何的问题
+			if (!ObjectUtils.allNotNull(historyAvgRate)) {
+						System.out.println("从数据库获取数据");
+						// 从数据库中获取
+						historyAvgRate = loanInfoMapper.selectHistryAvgRate();
+						redisTemplate.opsForValue().set(Constants.HISTORY_AVG_RATE,historyAvgRate,15, TimeUnit.DAYS);
+					} else {
+						System.out.println("从redis获取数据");
+					}
+		2. 但是：
+				如果网站在某一个时间点的访问量特别高的话。就会出现，多线程高并发的情况，是会出问题的
+				模拟多线程高并发
+				1. 在IndexController的toIndex()方法进行模仿多线程高并发
+				ExecutorService executorService = Executors.newFixedThreadPool(100);
+				for (int i = 0; i < 1000; i++) {
+					executorService.submit(new Runnable() {
+						@Override
+						public void run() {
+							// 开启线程执行任务
+							Double histryAvgRete = loanInfoService.queryHistoryAvgReta();
+							model.addAttribute(Constants.HISTORY_AVG_RATE,histryAvgRete);
+						}
+					});
+				}
+				// 关闭线程池
+				executorService.shutdownNow();
+				
+p2p-035-展示首页面-解决缓存击穿-2
+			以上代码发生的情况叫做"缓存击穿"
+			原因：
+					有个多个线程在访问缓存得到的数据都是null，同时进入了判断语句中去查找了数据库
+			如何解决：
+					双重验证+同步代码块 
+					Double historyAvgRate = (Double)redisTemplate.opsForValue().get(Constants.HISTORY_AVG_RATE);
+					if (!ObjectUtils.allNotNull(historyAvgRate)) {
+						// 设置同步代码块
+						synchronized (this) {
+							historyAvgRate = (Double)redisTemplate.opsForValue().get(Constants.HISTORY_AVG_RATE);
+							if (!ObjectUtils.allNotNull(historyAvgRate)) {
+								System.out.println("从数据库获取数据");
+								// 从数据库中获取
+								historyAvgRate = loanInfoMapper.selectHistryAvgRate();
+								redisTemplate.opsForValue().set(Constants.HISTORY_AVG_RATE,historyAvgRate,15, TimeUnit.DAYS);
+							}else {
+								System.out.println("从redis中获取数据");
+							}
+						}
+					} else {
+						System.out.println("从redis中获取数据");
+					}
+					
+			解决的原因：
+					即使多个线程都拿到了null,还会进行再次判断
+					
+p2p-036-展示首页面-获取平台注册总人数-1
+			1. 对接口中的Service和服务提供者中的impl 再次进行分包
+			2. 获取平台总人数
+					UserService 
+					简单代码实现
+					
+			3. 如何实现在IDEA中写sql语句出现提示
+					右侧maven下方有一个Datasource标签
+					新建一个Mysql
+						填写连接信息，默认情况下Test Connection连接是灰色的 ，需要在左侧选择驱动
+						连接后可通过上面的小扳手设置当前的数据库
+						
+p2p-037-展示首页面-获取平台注册总人数-2	
+			 @Override
+			public Long queryAllUserCount() {
+				//redisTemplate.setKeySerializer(new StringRedisSerializer());  注意：不需要每次都修改序列化方式，因为容器总只有一个redis对象
+
+				Long allUserCount = (Long) redisTemplate.opsForValue().get(Constants.ALL_USER_COUNT);
+
+				if (!ObjectUtils.allNotNull(allUserCount)) {
+					// 同步代码块
+					synchronized (this) {
+						allUserCount = (Long) redisTemplate.opsForValue().get(Constants.ALL_USER_COUNT);
+						if (!ObjectUtils.allNotNull(allUserCount)) {
+							
+							allUserCount = userMapper.selectAllUserCount();
+							redisTemplate.opsForValue().set(Constants.ALL_USER_COUNT,allUserCount);
+						}
+					}
+				}
+
+				return allUserCount;
+			}
+p2p-038-展示首页面-获取平台注册总人数-3
+		验证并测试
+		
+p2p-039-展示首页面-获取累计投资金额
+		1. 实现获取平台累计投资金额数据
+				分析：投资信息表b_bid_info 和用户收益表b_income_record表中都有投标收益这个字段
+				而我们使用投资新表中中的投标收益字段。 逻辑上更合理
+				
+		2. 同上实现获累计投资金额
+		3. 断点测试数据
+				SELECT SUM(bid_money) FROM b_bid_info;
+				
+				
+p2p-040-展示首页面-展示产品分析	
+			1. 页面分析
+				实际上 新手宝产品、优选类产品、散标类产品都是产品，只是类型不同，我们可以通过一个方法来实现三种方法的查询
+			2. 将下面的查询看做是一个分页，将使用MySql数据库中的limit函数实现
+
+p2p-041-展示首页面-实现展示产品-1
+			1. 核心代码
+				  // 根据产品类型获取产品列表(参数 产品类型, 页码, 每页显示的条数) 最终返回-->List<产品>
+				Map<String, Object> paramMap = new HashMap<String,Object>();
+				paramMap.put("currentPage",0);  // 每个产品都是显示第1页
+
+				// 获取新手宝产品,产品类型为0，显示第1页，每页显示1个
+				paramMap.put("productType",Constants.PRODUCT_TYPE_X);
+				paramMap.put("pageSize",1); //每页显示的条数(新手宝只显示1条)
+				List<LoanInfo> xLoanInfoList = loanInfoService.queryLoanInfoListByProductType(paramMap);
+					
+p2p-042-展示首页面-实现展示产品-2
+		1.  先实现mapper.xml文件的语句
+		2.  <!-- 根据产品类型来查询产品 -->
+			  <select id="selectLoanInfoListByProductType" resultMap="BaseResultMap" >
+					SELECT
+					  <include refid="Base_Column_List" />
+					FROM
+					  b_loan_info
+					WHERE product_type = #{productType}
+					ORDER BY rate
+					DESC LIMIT #{currentPage},#{pageSize};
+			  </select>
+		
+p2p-043-展示首页面-实现展示产品-3
+
+
+
+		 // 获取新手宝产品
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("currentPage",0);
+        paramMap.put("productType",Constants.PRODUCT_TYPE_X);
+        paramMap.put("pageSize",1);
+        List<LoanInfo> xLoanInfoList = loanInfoService.querLoanListByProduct(paramMap);
+        model.addAttribute("xLoanInfoList",xLoanInfoList);
+
+        // 获取优选产品
+        paramMap.put("productType",Constants.PRODUCT_TYPE_U);
+        paramMap.put("pageSize",4);
+        List<LoanInfo> uLoanInfoList = loanInfoService.querLoanListByProduct(paramMap);
+        model.addAttribute("uLoanInfoList",uLoanInfoList);
+
+        // 获取散标产品
+
+        paramMap.put("productType",Constants.PRODUCT_TYPE_S);
+        paramMap.put("pageSize",8);
+        List<LoanInfo> sLoanInfoList = loanInfoService.querLoanListByProduct(paramMap);
+        model.addAttribute("sLoanInfoList",sLoanInfoList);
+		
+		测试 数据
+		
+		
+		
+		注意：Dubbo传输的对象必须序列化（Serializable）	
+
+p2p-044-注释的使用方法		
+		1. 在接口的方法上往往使用多行注释,如果方法使用了多行注释，那么在方法的调用处，则可以使用
+		2. 使用快捷键ctrl+q可以快速查看方法的注释
+		3. 如果在类上面添加注释：
+				Setting -->Editor---> File and code Templaes -->Includes -->File Header添加类注释如下：
+						/**
+						* ClassName:${NAME}
+						* Package:${PACKAGE_NAME}
+						* Description: 描述信息
+						* @date:${DATE} ${TIME}
+						* @author:动力节点
+						*/
+						
+						
+						
+p2p-045-展示首页面-展示产品数据
+		在首页显示刚才查询到的数据
+				1. 平均年化收益率、平台用户数、累计成交金额
+				2. 新手宝的信息
+						 <div class="inner" th:each="xLoanInfo, xLoanInfoStat:${xLoanInfoList}">		
+
+p2p-046-展示首页面-展示产品数据
+			 <div th:each="uLoanInfo:${uLoanInfoList}">
+			  <div th:class="${uLoanInfo.leftProductMoney eq 0 ? 'pro-box pro-full' : 'pro-box'}">
+			  
+			  
+			    <div th:if="${sLoanInfoStat.count eq 4}">
+                <!-- 4个一组，分隔线 -->
+                <div style="line-height:25px;">&nbsp;</div>
+            </div>
+			
+
+
+			
+			
+			
+			
+p2p-047-分页查询产品列表-1	
+		1. 修改inde.html页面内容
+				查看更多优选类产品：
+						<a th:href="@{loan/loan(ptype=1)}">
+		2. 将新页面loan.html赋值到模板中
+		3. 创建LoanInfoController层
+			@Controller
+			public class LoanInfoController {
+
+				@RequestMapping(value = "/loan/loan")
+				public String loan(HttpServletRequest request, Model model,
+								   @RequestParam (value = "ptype",required = false) Integer ptype,
+								   @RequestParam (value = "currentPage", defaultValue = "1") Integer currentPage) {
+					// 根据产品类型分页查询产品列表(产品类型、页码、每页显示的条数) -> 返回(每页显示的数据，总条数)
+					
+					//用户投资排行榜
+					//TODO
+					return "loan";
+				}
+			}
+			
+		ptype 参数为什么可以为null?
+				首页顶部导航栏，我要投资按钮，是可以不传产品类型的。表示查询所有的产品
+
+		如果新加页面后，需要clean工程
+		
+		
+
+p2p-048-分页查询产品列表-2			
+		VO: valueObject 值对象：用于保存数据库查询出来的信息，这个对象的属性并不会跟任意一张表的字段一一相对
+		
+		// 根据产品类型分页查询产品列表(产品类型、页码、每页显示的条数) -> 返回(每页显示的数据，总条数) 
+		
+		com.bjpowernode.p2p.model.vo.PaginationVO
+			public class PaginationVO<T> {
+				/**
+				 * 总条数
+				 */
+				private Long total;
+
+				/**
+				 * 分页显示的数据
+				 */
+				private List<T> dataList;
+			}
+			
+					@RequestMapping(value = "/loan/loan")
+					public String toloan(HttpServletRequest request, Model model,
+                       @RequestParam(value = "ptype",required = false) Integer ptype,
+                       @RequestParam (value = "currentPage", defaultValue = "1") Integer currentPage) {
+						// 根据产品类型分页查询产品列表(产品类型、页码、每页显示的条数) -> 返回(每页显示的数据，总条数) 分页模型对象(每页显示的数据，总条数)
+
+						Map<String, Object> paramMap = new HashMap<>();
+						if (ObjectUtils.allNotNull(ptype)) {
+							paramMap.put("productType",ptype);
+						}
+						int pageSize = 9;
+						paramMap.put("pageSize",pageSize);
+						paramMap.put("currentPage",(currentPage - 1) * currentPage);
+						PaginationVO<LoanInfo> paginationVo = loanInfoService.queryLoanInfoListByPage(paramMap);
+
+						// 计算总页数
+						int totalPage = paginationVo.getTotal().intValue() / pageSize;
+						int mod = paginationVo.getTotal().intValue() % pageSize;
+
+						if (mod > 0) {
+							totalPage = totalPage + 1;
+						}
+						// 用户投资排行榜
+						//TODO
+						return "loan";
+					}
+					
+					下面实现业务层分页查询的方法
+					
+p2p-049-分页查询产品列表-3
+			
+			目标
+			 PaginationVO<LoanInfo> queryLoanInfoListByPage(Map<String, Object> paramMap);
+			 该方法要查询出List<T>和 total	
+			
+			1. 接口：
+				添加方法
+					 /**
+					 * 根据产品类型查询分页产品
+					 * @param paramMap
+					 * @return
+					 */
+					PaginationVo<LoanInfo> queryLoanInfoListByPage(Map<String, Object> paramMap);
+		2. 实现类
+				@Override
+				public PaginationVo<LoanInfo> queryLoanInfoListByPage(Map<String, Object> paramMap) {
+					// 创建PaginationVo对象
+					PaginationVo<LoanInfo> paginationVo = new PaginationVo<LoanInfo>();
+
+
+					// 根据mapper查询总记录数
+				   Long togalPage = mapper.selectTotalPage(paramMap);
+
+
+					// 将数据封装到PaginatonVo中
+					paginationVo.setTotal(togalPage);
+
+					List<LoanInfo> loanInfos = mapper.selectLoanInfoListByProductType(paramMap);
+
+					paginationVo.setDataList(loanInfos);
+					return paginationVo;
+				}
+				
+		3. Mapper中实现selectTotalPage方法
+				 /**
+				 * 根据产品类型查询产品总记录数
+				 * @param paramMap
+				 * @return
+				 */
+				Long selectTotalPage(Map<String, Object> paramMap);
+				
+		4. Mapper.xml
+				<!-- 根据产品类型查询总记录数 -->
+			  <select id="selectTotalPage" resultType="java.lang.Long" >
+					  SELECT
+							COUNT(*)
+						FROM
+							b_loan_info
+						 <where>
+								<if test="productType != null">   **** 注意 ：这里的productType是参数，不是字段
+								  product_type = #{productType}
+							</if>
+					  </where>
+			  </select>
+
+		5. 修改之前的根据产品类型查询产品的mapper.xml
+				<!-- 根据产品类型来查询产品 -->
+			  <select id="selectLoanInfoListByProductType" resultMap="BaseResultMap" >
+					SELECT
+					  <include refid="Base_Column_List" />
+					FROM
+					  b_loan_info
+					  <where>
+							<if test="productType != null">  
+							  product_type = #{productType}
+							</if>
+					  </where>
+
+					ORDER BY rate
+					DESC LIMIT #{currentPage},#{pageSize};
+			  </select>		
+
+p2p-050-分页查询产品列表-4
+		1. 修改index.html文件中的请求地址
+				th:href="@{loan/loan(ptype=1)}"  优选产品
+				th:href="@{loan/loan(ptype=2)}"  散标产品
+				
+			
+				
+		2. 修改header.html文件中的请求地址
+				<h2><a id="wytz" th:href="@{/loan/loan}">我要投资<i></i></a></h2>
+            	<div class="menu-drop" style="display:none;">
+	               <a th:href="@{/loan/loan(ptype=1)}">优选类产品</a>
+	               <a th:href="@{/loan/loan(ptype=2)}">散标类产品</a>
+	            </div>
+				
+		3. 开始测试
+		
+p2p-051-分页查询产品列表-5
+		1. 在Controller中的Model中添加属性
+					model.addAttribute("loanInfoList",paginationVo.getDataList());  // 产品列表
+					model.addAttribute("totalRows",paginationVo.getTotal());		// 总条数
+					model.addAttribute("totalPage",totalPage);					// 总页数
+					model.addAttribute("currentPage",currentPage);			// 当前页
+				
+		2. 修改loan.html页面(进循环显示div)
+				<div class="pro-list">下面循环
+		
+p2p-052-分页查询产品列表-6
+			产品列表底部的页码实现
+			1. <td>
+				<span th:text="|共${totalRows}条${totalPage}页&nbsp;当前为第${currentPage}页|">共20条3页　当前为第2页</span>
+				<span th:switch="${currentPage}">
+					<span th:case="1">
+						首页
+						上一页
+					</span>
+					<span th:case="*">
+						<a id="linkHomePage" th:href="@{/loan/loan(ptype=${ptype})}">首页</a>
+						<a id="linkPreviousPage" th:href="@{/loan/loan(ptype=${ptype},currentPage=${currentPage - 1})}">上一页</a>
+					</span>
+				</span>　
+
+				<span th:switch="${currentPage}">
+					<span th:case="${totalPage}">
+						下一页
+						尾页
+					</span>
+					<span th:case="*">
+						<a id="linkNextPage" th:href="@{/loan/loan(ptype=${ptype},currentPage=${currentPage + 1})}">下一页</a>
+						<a id="linkLastPage" th:href="@{/loan/loan(ptype=${ptype},currentPage=${totalPage})}">尾页</a>
+					</span>
+				</span>　
+
+
+			</td>
+			
+	2. Controller
+				// 点击换页时需要参数ptype
+				if (ObjectUtils.allNotNull(ptype)) {
+					model.addAttribute("ptype",ptype);
+				}	
+				
+p2p-053-产品详情页-1
+			1. 目标：实现产品详情展示
+			2. 拷贝产品详情页面
+			3.  LoanController
+			
+				@RequestMapping(value = "loan/loanInfo")
+				public String loanInfo(HttpServletRequest request,Model model) {
+					// 根据产品ID查询产品信息
+
+					
+
+					// 查询投资记录(多表查询)
+					
+					// 查询可用资金
+					return "loanInfo";
+				}
+			4. 分析页面构成：
+					产品详情
+					投资记录
+					可投金额
+					
+					
+p2p-054-产品详情页-2				
+		1. 修改立即投资的连接(首页，产品列表页)
+				加上id
+						 <a th:href="@{/loan/loanInfo(id=${sLoanInfo.id})}" class="btn-1">立即投资</a>
+		2. LoanController
+				@Reference(interfaceClass = BidInfoService.class, version = "1.0.0", check = false, timeout = 15000)
+				private BidInfoService bidInfoService;
+				
+				中添加一个ID参数
+					 public String loanInfo(HttpServletRequest request,Model model,
+                           @RequestParam(value = "id", required = true) Integer id) 
+		3. 实现根据产品ID查询产品信息
+			   LoanInfo loanInfo = loanInfoService.queryLoandInfoById(id);
+				model.addAttribute("loanInfo",loanInfo);
+				
+				
+		
+		4. 根据产品ID查询投资前十条记录
+				先实现sql语句
+				SELECT
+					b.*,u.*
+				FROM 
+					b_bid_info  b
+					LEFT JOIN u_user u
+					ON
+					b.uid = u.id
+					WHERE b.loan_id = 7
+					
+				ORDER BY 
+					b.bid_time 
+				DESC 
+
+				LIMIT 0,10;
+				
+		5.   	@RequestMapping(value = "loan/loanInfo")
+				public String loanInfo(HttpServletRequest request,Model model,
+									   @RequestParam(value = "id", required = true) Integer id) {
+					// 根据产品ID查询产品信息
+					LoanInfo loanInfo = loanInfoService.queryLoanInfoById(id);
+					model.addAttribute("loanInfo",loanInfo);
+
+					// 根据产品ID查询投资前十条记录
+					Map<String,Object> paramMap = new HashMap<>();
+					paramMap.put("loanId",id);
+					paramMap.put("currentPage",0);
+					paramMap.put("pageSize",10);
+					List<?> list = bidInfoService.queryRecentlyBidInfoByLoanId(paramPam);
+					model.addAttribute("loanInfoList",loanInfoList);
+
+					// 查询可用资金
+
+
+					return "loanInfo";
+				}
+			}
+					
+			
+		6. 分析：List<?> list = bidInfoService.queryRecentlyBidInfoByLoanId(paramPam);
+				这里面的问号到底应该是什么类型？
+						类型1: BidInfo类型，但是需要将用户的手机号映射到BidInfo中的某一个字段上(非常不建议)
+						类型2：XxxVo类型(valueObject,该类的字段是投资记录要显示的字段)。可以的
+						类型3：还是BidInfo类型，但是要在该类中添加一个字段并提供get和set方法
+								1. 在BidInfo类中，添加一个属性 private User user;并提供get和set方法
+								2. 在BidInfoMapper.xml添加
+									<resultMap id="BidInfoUserResultMap" type="com.bjpowernode.p2p.model.loan.BidInfo">
+									  <id column="id" jdbcType="INTEGER" property="id" />
+									  <result column="loan_id" jdbcType="INTEGER" property="loanId" />
+									  <result column="uid" jdbcType="INTEGER" property="uid" />
+									  <result column="bid_money" jdbcType="DOUBLE" property="bidMoney" />
+									  <result column="bid_time" jdbcType="TIMESTAMP" property="bidTime" />
+									  <result column="bid_status" jdbcType="INTEGER" property="bidStatus" />
+
+								  <!--  关联查询（投资记录表与用户表） 一对一关系 ：-->
+									<association property="user" javaType="com.bjpowernode.p2p.model.user.User">
+									  <result column="phone" jdbcType="VARCHAR" property="phone" />
+									  <result column="login_password" jdbcType="VARCHAR" property="loginPassword" />
+									  <result column="name" jdbcType="VARCHAR" property="name" />
+									  <result column="id_card" jdbcType="VARCHAR" property="idCard" />
+									  <result column="add_time" jdbcType="TIMESTAMP" property="addTime" />
+									  <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime" />
+									  <result column="header_image" jdbcType="VARCHAR" property="headerImage" />
+									</association>
+								  </resultMap>	
+								  
+								1. association 表示一对一关系
+								2. user的映射可以上UserMapper.xml中赋值
+								3. user的id可以去掉，因为上面已经有了
+			7. 把List<?> list = bidInfoService.queryRecentlyBidInfoByLoanId(paramPam);做完
+			
+p2p-055-产品详情页-3
+				1. 打断点验证
+		2. 修改页面数据
+				1. 修改产品信息
+				
+				<span th:switch="${loanInfo.productStatus}">
+                    <span th:case="0">
+                        <span th:text="|募集中,剩余募集金额 ${loanInfo.leftProductMoney}元|">募集中,剩余募集金额 500000.0元</span>
+                    </span>
+
+                    <span th:case="*">
+                        <span>已满标</span>
+                    </span>
+
+                </span>
+		3. 投资周期
+					<p>投资周期</p>
+				  <!-- 只有新手宝产品周期为天 -->
+					<span th:switch="${loanInfo.productType}">
+						<span th:case="0">
+							 <h3 th:text="|${loanInfo.cycle}天|">6天</h3>
+						</span>
+						 <span th:case="*">
+							 <h3 th:text="|${loanInfo.cycle}个月|">6个月</h3>
+						</span>
+					</span>
+					
+					
+p2p-056-产品详情页-4
+		1. 循环遍历显示最近十条投资记录
+				如果没有投资记录  则提示	
+			<span th:if="${#lists.isEmpty(bidInfoList)}">
+                <!-- 如果投资记录为空，显示以下文字 -->
+			    <dd style="text-align:center;">该产品暂时还没有人投资，赶快去投资吧~</dd>
+            </span>
+
+            <span th:if="${!#lists.isEmpty(bidInfoList)}">
+                <span th:each="bidInfo:${bidInfoList}">
+                    <!-- 如果有投资记录，循环遍历显示 -->
+                    <dd>
+                        <span class="record-num">1</span>
+                        <span class="invest-user" th:text="${bidInfo.user.phone}">137******89</span>
+                        <span class="invest-money" th:text="${bidInfo.bidMoney}">1000.0</span>
+                        <span class="invest-time" th:text="${bidInfo.bidTime}">2017-09-12 13:34:22</span>
+                    </dd>
+                </span>
+
+            </span>		
+
+p2p-057-产品详情页-5
+				格式化页面数据
+			 <span class="record-num" th:text=${bidInfoStat.count}>1</span>
+			<span class="invest-user" th:text="|${#strings.substring(bidInfo.user.phone,0,3)}****${#strings.substring(bidInfo.user.phone,9,11)}|">137******89</span>
+			<span class="invest-money" th:text="${bidInfo.bidMoney}">1000.0</span>
+			<span class="invest-time" th:text="${#dates.format(bidInfo.bidTime,'yyyy-MM-dd HH:mm:ss')}">2017-09-12 13:34:22</span>	
+			
+p2p-058-用户注册-1
+		1. 复制register.html页面
+		2. @Controller
+		public class UserController {
+
+			@RequestMapping(value = "/loan/page/register")
+			public String register(HttpServletRequest request, Model model) {
+				return "register";
+			}
+		}
+		3. 因为添加了行的页面，所有启动之前clean一下
+		
+p2p-059-用户注册-2
+	1. 过去的注册很麻烦
+			
+	2. 现在的注册看似简单，但是后期会逐步完善自己的信息
+	
+	3. 查看一些网站的注册流程
+		
+	4. 不合法的手机号等信息在前端就会被验证。 验证通过后才能注册
+	
+	
+p2p-060-用户注册-3
+	分析：
+			由于短信验证码功能相对比较复杂，所有我们分开做
+			先做手机号以及密码部分功能，然后再做短信验证
+			
+				
+p2p-061-用户注册-4
+		1. 手机号验证的规则
+				1. 不能为空
+				2. 只能是数字
+				3. 数字的长度必须只是11位
+				
+			如果对需求不熟悉，则可以查看竞品
+				
+		2. 每一个输入框都是 lable input span div这几个标签组成
+		3. 查看register.js文件
+				会相应的成功、失败等提示的函数		
+
+p2p-062-用户注册-5	
+		1. 在register.js文件中
+					页面加载完成后，给手机号输入框添加一个失去焦点的事件
+					
+					// 验证手机号(注册一个失去焦点事件)
+					$("#phone").on("blur",function () {
+						// 获取手机号码
+						var phone = $.trim($("#phone").val());
+						// 验证 如果手机号为空，则提示
+						if ("" == phone) {
+							showError("phone","对不起，手机号不能为空");
+						} else if (!(/^1[3,4,5,7,8][9][0-9]\d{8}$/.test(phone))) {
+							showError("phone","手机号码不正确")
+						} else {
+							// 验证手机号是否存在
+						}
+
+
+					});
+					
+			2. // 验证手机号是否存在
+					实际上是一个异步请求，
+							先参考 爱前进网站注册的时候失去焦点的请求的返回情况
+							{'code':1}
+							不能用
+							能用{"code":1,"message":"","success":true}
+							不能用
+								{"code":-1,"message":"137xxxx被占用了","success":false}
+									
+p2p-063-用户注册-6
+			异步请求
+			// 验证手机号是否存在
+				$.ajax({
+					url:"/loan/checkPhone",
+					type:"get",
+					data:"phone=" + phone,
+					success:function (data) {
+						if (data.code == "1") {
+							showSuccess("phone")
+						} else {
+							showError("phone",data.message)
+						}
+					},
+					error:function () {
+						showError("phone","系统繁忙，请稍后.")
+					}
+				});
+				
+p2p-064-用户注册-7			
+		1. UserController中添加方法
+				@RequestMapping(value = "/loan/checkPhone")
+				@ResponseBody
+				public Object checkPhone(@RequestParam(value = "phone",required = true) String phone) {
+					Map<String, Object> resultMap = new HashMap<>();
+					resultMap.put("code",1);
+
+					return resultMap;
+				}
+		2. 验证
+		
+p2p-065-用户注册-8		
+		1. 分析：
+				如果直接往map中存放数据，最后返回json  太麻烦。 直接创建一个类Common接口中
+				
+		2.	 	/**
+				 * 响应成功结果
+				 * @return
+				 */
+				public static Result success() {
+					Result result = new Result();
+					result.put("code",1);
+					result.put("success",true);
+
+					return result;
+				}
+				
+				 /**
+				 * 响应失败结果
+				 * @param message
+				 * @return
+				 */
+				public static Result error(String message) {
+					Result result = new Result();
+					result.put("code",-1);
+					result.put("success",false);
+					result.put("message",message);
+
+					return result;
+				}
+				
+		3.		UserController
+				@RequestMapping(value = "/loan/checkPhone")
+				@ResponseBody
+				public Object checkPhone(@RequestParam(value = "phone",required = true) String phone) {
+					// 判断数据库是否有该手机号
+					User user = userService.queryUserByPhone(phone);
+					if (ObjectUtils.allNotNull(user)) {
+						return Result.error("手机号码已被注册，请更换手机号");
+					}
+
+					return Result.success();
+				}
+		
+			UserService接口
+				/**
+				 * 根据phone 手机号，返回用户对象
+				 * @param phone
+				 * @return
+				 */
+				User queryUserByPhone(String phone);
+				
+			UserServiceImpl实现类
+				  @Override
+			public User queryUserByPhone(String phone) {
+				return userMapper.selectUserByPhone(phone);
+			}
+			
+			UserMapper接口
+				 /**
+				 * 根据手机号查询用户
+				 * @param phone
+				 * @return
+				 */
+				User selectUserByPhone(String phone);
+				
+			UserMapper.xml
+					<!-- 根据手机号查询用户信息 -->
+				  <select id="selectUserByPhone" resultMap="BaseResultMap">
+					select
+						<include refid="Base_Column_List" />
+					from
+						u_user
+					where
+						phone = #{phone}
+				  </select>
+									
+									
+p2p-066-用户注册-09		
+		目标: 对密码进行非空和格式的验证
+		1. 密码验证
+				// 验证密码
+			$("#loginPassword").on("blur",function () {
+				// 获取密码
+				var loginPassword = $.trim($("#loginPassword").val());
+				if ("" == loginPassword) {
+					showError("loginPassword","密码不能为空");
+				} else if (!/^[0-9a-zA-Z]+$/.test(loginPassword)) {
+					showError("loginPassword","密码只可使用数字和大小写英文字母");
+				} else if (!/^(([a-zA-Z]+[0-9]+)|([0-9]+[a-zA-Z]+))[a-zA-Z0-9]*/.test(loginPassword)) {
+					showError("loginPassword","密码必须包含英文和数字");
+				} else if (loginPassword.length < 6 || loginPassword.length > 20) {
+					showError("loginPassword", "密码长度应为6到20位");
+				} else {
+					showSuccess("loginPassword");
+				}
+			});
+			
+p2p-067-用户注册-10			
+		1. 先把短信验证这块div注释掉
+		2. 代码实现
+				1. 给注册按钮绑定一个单击事件
+						// 注册
+						$("#btnRegist").on("click", function () {
+							alert("===");
+						});
+						
+				2. 点击按钮的时候，先验证用户名和密码两个输入框是否有值(就是触发两个文本框的失去焦点事件)
+							// 注册
+							$("#btnRegist").on("click", function () {
+								$("#phone").blur();
+								$("#loginPassword").blur();
+							});
+							
+				3. 上面只是触发了两个文本框的失去焦点事件
+						但是如果说，有错误提示，我们就不能去情况注册的请求
+						
+						怎么判断？
+								应该判断有没有错误内容，如果有，就return false  停止请求注册，否则才去注册
+							思路：因为两个错误提示的div的id都是以Err结尾，所有我们可以通过jquery来获取所有的提示错误的div
+							可以百度 jquery api帮助文档 找到选择器
+							
+							// 注册
+							$("#btnRegist").on("click", function () {
+								$("#phone").blur();
+								$("#loginPassword").blur();
+								var errorText = $("div[id$='Err']").text();
+								if ("" == errorText) {
+									alert("没有问题，提交注册请求")
+								}
+							});
+							
+p2p-068-用户注册-11						
+		1.  问题1. 在实际应用中，我们发现有个现象，就是一旦点击注册按钮后，密码输入框的内容会变长
+		2.  如何实现的呢？
+				其实就是使用了加密库， 然后重新赋值，赋完值以后再来将加密后的密码传给后台
+				
+		3. 代码实现
+				1. 点击注册后先获取用户名和密码
+					var phone = $("#phone").val();
+					var loginPassword = $("#loginPassword").val();
+					
+				2. 加长密码
+					$("#loginPassword").val($.md5(loginPassword)); 其实就是md5加密  位于文件/js/jQuery.md5.js中
+					
+		4. 代码用户名和密码箱后台发出请求
+				if ("" == errorText) {
+					// 给密码输入框重新赋值
+					$("#loginPassword").val($.md5(loginPassword));
+						$.ajax({
+							url: "/p2p/loan/register",
+							type: "post",
+							data:{
+								"phone":phone,
+								"loginPassword":$.md5(loginPassword)
+							},
+							success:function (data) {
+								if (data.code == 1) {
+									window.location.href = "/index";
+								} else {
+									showError("loginPassword",data.message)
+								}
+							},
+							error:function () {
+									showError("loginPassword","系统繁忙，请稍后重试")
+							}
+
+
+						});
+				}
+				
+p2p-069-用户注册-12
+			
+				UserController类
+					@PostMapping(value = "/loan/register")
+					public @ResponseBody Object loanRegister(HttpServletRequest request,
+															 @RequestParam(value = "phone", required = true) String phone,
+															 @RequestParam(value = "loginPassword",required = true) String loginPassword) {
+						try {
+							// 用户注册(1. 新增用户 2. 新增账户), 返回 User | int |String ...
+							User user = userService.register(phone, loginPassword);
+							// 用户信息存放到Session中去
+							request.setAttribute(Constants.SESSION_USER,user);
+
+						}catch (Exception e) {
+							e.printStackTrace();
+							return Result.error("系统繁忙，请稍后重试。");
+						}
+
+						return Result.success();
+						
+						
+p2p-070-用户注册-13
+		1. Constants 类添加
+				 /**
+				 * 用户信息
+				 */
+				public static final String SESSION_USER = "user";
+				
+		2. 接口UserService添加方法
+				/**
+				 * 用户注册
+				 * @param phone
+				 * @param loginPassword
+				 * @return
+				 */
+				User register(String phone, String loginPassword);
+		
+		3. 实现类UserServiceImpl
+				@Transactional
+				@Override
+				public User register(String phone, String loginPassword) throws Exception {
+					// 新增用户
+					User user = new User();
+					user.setPhone(phone);
+					user.setLoginPassword(loginPassword);
+					user.setAddTime(new Date());
+					user.setLastLoginTime(new Date());
+
+					int insertUserCount = userMapper.insertSelective(user);
+					//int a = 10 /0;
+					if (insertUserCount <= 0) {
+						throw new Exception("新增账户失败");
+					}
+
+					// 根据手机号查询用户id
+					User userDetil = userMapper.selectUserByPhone(phone);
+
+					//  新增账户，并且将账户余额设置为888
+
+					FinanceAccount financeAccount = new FinanceAccount();
+					financeAccount.setUid(userDetil.getId());
+					financeAccount.setAvailableMoney(888.0);
+
+					int insertFinanceAccountCount = financeAccountMapper.insertSelective(financeAccount);
+
+					if (insertFinanceAccountCount <= 0) {
+						throw new Exception("开设账户失败");
+					}
+					return userDetil;
+				}
+				
+				注意测试的时候 实验一下错误的演示int a = 10 /0;						
+						
+						
+			4. 优化：
+					上面的添加用户操作成功后，数据库还没有生成新的用户id，需要再次查询数据库
+					但是再次查询数据库会导致数据库压力变大
+					可以在UserMapper.xml的insertSelective方法中使用
+						<!-- 查询自增值 -->
+						 <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER">
+								select @@IDENTITY as id
+						</selectKey>				
+					
+p2p-072-短信验证码概述						
+						
+						
+		1. 短信验证的过程
+					开发人员不会直接对接电信运营商。而是通过第三方sdk实现短信验证的方式
+					
+		2. 短信是有个格式的，由国家工信部制定
+				【xxx】您的短信验证码是:1234,在1分钟内有效
+				
+		3. 短信签名必须是【xxx】  其中xxx是公司的简称
+			微信正文：您的短信是验证码是：12345,请在1分钟之内有效						
+						
+						
+p2p-073-短信平台介绍-腾讯云
+		1. 了解
+			
+p2p-074-短信平台介绍-京东万象
+		1. 京东万象 网址 https://wx.jdcloud.com/
+		2. 进入首页--左侧API--->短信API
+					106短信接口
+						使用京东app扫码登录
+					了解sdk
+					
+p2p-75-短信平台介绍-京东万象-106短信接口
+		1. 公共返回参数跟返回实例是有区别的
+		2. 公共返回参数表示的是通信是否成功
+					当code的值为1000的时候，说明通信才成功。 通信成功才有可能有结果，否则不可能有结果
+					
+		
+		
+p2p-076-短信平台介绍-京东万象-106短信接口
+
+		不能发生短信的结果：
+		Status Code: 200
+		Time：52ms
+		Date：Thu 11 Mar 2021 03:01:33 GMT
+		Body：
+		{
+			"code": "10010",
+			"charge": false,
+			"remain": 0,
+			"msg": "接口需要付费，请充值",
+			"requestId": "9c45356ae5764d04b4b4950fd16e6f75"
+		}
+
+		成功调用第三方接口的结果
+		Status Code: 200
+		Time：88ms
+		Date：Thu 24 Dec 2020 02:28:31 GMT
+		Body：
+		{
+		    "code": "10000",
+		    "charge": false,
+		    "remain": 0,
+		    "msg": "查询成功",
+		    "result": "<?xml version=\"1.0\" encoding=\"utf-8\" ?><returnsms>\n <returnstatus>Success</returnstatus>\n <message>ok</message>\n <remainpoint>-7046347</remainpoint>\n <taskID>166052768</taskID>\n <successCounts>1</successCounts></returnsms>"
+		}
+		接口返回的数据格式是 json+xml 所以我们需要解析json和xml
+		
+p2p-074-解析xml两种方式及区别
+					如何解析xml文档？
+						SAX解析
+						dom解析
+					区别：
+						SAX解析是边读边解析(读一部分就解析一部分)
+						dom解析是会将文档全部加载到内容中然后再解析
+						
+						举例：
+								SAX是吃饭的时候一口一口吃
+								dom是直接吞下饭
+						一般来说，如果文档比较大，建议使用sax，如果文档比较小则使用dom
+						最重要的区别：
+								dom可以对文档的内容进行增删改，而sax只能读
+								
+						一般我们采用的是dom4j+xpath来解析文档
+						
+						
+						
+p2p-76-xpath语法概述
+		1. 百度xpath教程
+				找到w3school中的xpath语法
+					XML 实例文档
+					选取节点
+					实例
+					谓语（Predicates）
+					
+		2. 注意：
+				XPath 使用路径表达式来选取 XML 文档中的节点或节点集，并不是获取其中的文本内容
+				
+p2p-077-dom4j-xpath实例
+			目标： 获取xml中第一个title的内容
+			1. 做一个dom4j+xpath解析的案例
+			2. 创建一个maven的java 项目
+			3.  找到中央仓库 https://mvnrepository.com/
+					搜索dom4j  选择第二个 版本使用2.1.0
+					
+					xmlString = "xml数据";
+			4.  // 将xml文件转成Document对象
+				Document document = DocumentHelper.parseText(xmlString);
+
+				// 获取xml中第一个title的内容
+				Node node = document.selectSingleNode("bookstore/book[1]/title");
+				System.out.println(node.getText());
+			
+			注意XPath需要jaxen.jar包，如果使用mave添加demo4j(版本是2.1.0)依赖的话会自动下载这个jar包，无需更多操作				
+							
+						
+p2p-078-httpclient
+		我们自己的p2p工程要想访问第三方的接口(如发送短信验证码), 用dubbo是无法实现的，需要接触其它的一些工具。 常用的就Apache httpclient
+		详见资料004-httpclient
+		
+		
+		
+		1. 查看	
+			HttpClientTest01.java java原生
+			HttpClientTest02.java		apache Common
+			HttpClientTest03.java
+		2. 需要添加依赖
+			<!-- httpclient4.5版本 -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.3</version>
+			</dependency>
+
+			<!-- httpclient3.1版本 -->
+			<dependency>
+				<groupId>commons-httpclient</groupId>
+				<artifactId>commons-httpclient</artifactId>
+				<version>3.1</version>
+			</dependency>
+			
+			4.5 改成了独立的工程
+			
+
+p2p-079-短信验证码倒计时插件
+			1. 当我们点击获取短信的时候。 就会有一个倒计时的动作
+			2. 这些倒计时的效果，完全不用我们自己写
+					百度  轻量级倒计时  -->轻量级倒计时插件leftTime.js-素材牛---->查看演示
+					
+			还需要引入样式，testBtn-a .testBtn-a.on  （已经在注册页中引入了）
+
+		
+p2p-080-短信验证码功能分析
+			1. 当我们点击获取验证码的时候，并不是直接向第三方发出请求的，
+							需要对手机号码以及密码输入框进行非空和格式的验证
+			2. 当获取到验证码并且输入以后。我们点击注册
+							需要对文本框中的验证码跟实际的验证进行对比
+									那么实际的验证码需要生产后并保存起来
+												保存的地方 session、数据库、redis
+												session适合保存变化较小的值
+												如果是存到数据库中，那么失效后还能继续使用，不合适
+												redis是内存中，效率高，而且redis本身也有失效时间				
+						
+						
+						
+p2p-081-短信验证码功能实现-1
+			1. 代码实现步骤分析
+				可以分成几个小的步骤
+				1. 第一步，当点击按钮后，先实现倒计时效果
+				2. 第二步，当点击按钮后 ，对手机号和密码进行验证
+				3. 第三步，当点击按钮后，后台发送短信后才开始倒计时
+				
+			2. 	
+				代码实现1：
+						// 倒计时按钮
+						$("#messageCodeBtn").on("click",function () {
+
+							$.leftTime(60, function (d) {
+								if (d.status) {
+									// 倒计时
+									//1. 先把按钮设置为不可用
+									$("#messageCodeBtn").addClass("on");
+									//2. 把修改按钮的文本内容
+									$("#messageCodeBtn").html((d == "00" ? "60" : d.s) + "秒后获取");
+								} else {
+									// 倒计时结束
+									// 修改按钮样式，设置为可用
+									$("#messageCodeBtn").removeClass("on");
+									$("#messageCodeBtn").html("获取验证码");
+								}
+							})
+
+						});
+				
+			3. 细节：如果当前没有on样式，说明不在倒计时状态，才能倒计时
+				if (!$("# ").hasClass("on")) {
+				}				
+						
+						
+p2p-082-短信验证码功能实现-2						
+			1. 点击获取验证码按钮后，先对手机号和密码框进行验证
+					if (!$("#messageCodeBtn").hasClass("on")) {
+
+			$("#phone").blur();
+			$("#loginPassword").blur();
+
+			// 获取错误提示信息
+			var errorText = $("div[id$='Err']").text();
+
+				if ("" == errorText) {
+					// 开始验证
+				}
+			}
+			2. 将代码改成等发送验证码成功以后才开始倒计时
+					UserController类添加方法
+					
+						@PostMapping(value = "/user/messageCode")
+						@ResponseBody
+						public Result messageCode(HttpServletRequest request,
+												  @RequestParam(value = "phone",required = true) String phone) {
+							
+
+							return Result.success();
+						}	
+
+						
+						
+p2p-083-短信验证码功能实现-3
+				Status Code: 200
+				Time：240ms
+				Date：Thu 12 Nov 2020 09:42:41 GMT
+				Body：
+				{
+					"code": "10000",
+					"charge": false,
+					"remain": 0,
+					"msg": "查询成功",
+					"result": "<?xml version=\"1.0\" encoding=\"utf-8\" ?><returnsms>\n <returnstatus>Success</returnstatus>\n <message>ok</message>\n <remainpoint>-6850193</remainpoint>\n <taskID>162317289</taskID>\n <successCounts>1</successCounts></returnsms>"
+					}
+					
+				1. 使用提前准备好的HttpClient请求
+							在common中添加相关依赖
+									 <!-- httpclient4.5版本 -->
+									<dependency>
+										<groupId>org.apache.httpcomponents</groupId>
+										<artifactId>httpclient</artifactId>
+										<version>4.5.3</version>
+									</dependency>
+
+									<dependency>
+										<groupId>com.alibaba</groupId>
+										<artifactId>fastjson</artifactId>
+										<version>1.2.36</version>
+									</dependency>
+								</dependencies>
+					
+					2. 在web中加入dom4j依赖
+						<dependency>
+							<groupId>org.dom4j</groupId>
+							<artifactId>dom4j</artifactId>
+						</dependency>
+					
+					
+					3. 核心代码
+						  HashMap<String, Object> paramMap = new HashMap<>();
+							paramMap.put("appkey","0e97b3c5e497b7637867e71c44a42b1e");
+							paramMap.put("mobile",phone);
+							// 生成一个随机验证码
+							String messageCode = this.getRandomNumber(6);
+							paramMap.put("content","【凯信通】您的验证码是：" + messageCode);
+							String jsonString = HttpClientUtils.doPost("https://way.jd.com/kaixintong/kaixintong", paramMap);
+							//将json格式的字符串转成json对象
+							JSONObject jsonObject = JSONObject.parseObject(jsonString);
+							//获取通信标示code
+							String code = jsonObject.getString("code");
+							// 判断
+							if (!StringUtils.equals("10000",code)) {
+								// 通信失败
+								return Result.error("通信异常");
+							}
+							// 获取其中result中的xml数据
+							String resultXmlString = jsonObject.getString("result");
+							//dom4j+xpath解析xml
+							Document document = DocumentHelper.parseText(resultXmlString);
+							// 根据路径表达式来找到returnstatus标签
+							Node node = document.selectSingleNode("//returnstatus");
+							String text = node.getText();
+
+							if (!StringUtils.equals(text,"Success")) {
+								return Result.error("发送短信失败");
+							}
+							// 发送成功，将验证码保存在redis中
+							redisService.put(phone,code);
+					
+					
+			4. 因为要把生成的验证码放到redis中 所有要创建Redis						
+						
+						
+						
+						
+						
+p2p-084-短信验证码功能实现-4					
+			RedisServiceImpl实现类
+				@Component
+				@Service(interfaceClass = RedisService.class, version = "1.0.0", timeout = 15000)
+				public class RedisServiceImpl implements RedisService {
+
+					@Autowired
+					private RedisTemplate<Object, Object> redisTemplate;
+
+					@Override
+					public void put(String phone, String code) {
+						redisTemplate.opsForValue().set(phone,code,60, TimeUnit.SECONDS);
+					}
+				}					
+			2. 验证		
+					记得clean清空缓存
+
+p2p-085-短信验证码功能实现-5	
+			1. 先注释掉
+					String jsonString = HttpClientUtils.doPost("https://way.jd.com/kaixintong/kaixintong", paramMap);
+			2. 提供一个写死的字符串
+					上面的字符串
+					
+			3. 当点击注册按钮的时候，应该对短信验证码也进行非空验证
+				// 判断验证码框是否为空
+				$("#messageCode").on("blur",function () {
+					var messageCode = $.trim($("#messageCode").val());
+					if ("" == messageCode) {
+						showError("messageCode",messageCode);
+					} else {
+						showSuccess("messageCode")
+					}
+				});
+				
+			4. 点击注册按钮的时候加上对验证码框也验证
+						1. 失去焦点验证
+						2. 请求的时候加上messageCode参数
+						3. 在Controller类中的方法上添加行参
+						4. 从redis中取出phone的验证码
+									跟参数进行对比
+									
+			5. 创建一个从redis中获取验证码的方法
+						RedisServiceImpl
+						@Override
+						public String get(String phone) {
+							return (String) redisTemplate.opsForValue().get(phone);
+						}
+						
+						
+				if (!StringUtils.equals(messageCode, redisMessageCode)) {
+						return Result.error("请输入正确验证码");
+					}		
+
+p2p-086-短信验证码功能实现-6
+	验证
+	
+p2p-087-实名认证-页面跳转
+	注册成功后跳转到实名认证页面
+	
+	
+	
+	
+
+p2p-092-实名认证-验证页面元素
+		1. 将realName.html页面的图形验证码改成短信验证		复制即可	
+		2. 验证 手机号 姓名 身份证 
+				记得先把onbulr方法去掉
+				<!-- 手机号验证 -->
+				$("#phone").on("blur",function () {
+					var phone = $.trim($("#phone").val());
+					if ("" == phone) {
+						showError("phone","请输入手机号")
+					} else if (!/^1[1-9]\d{9}$/.test(phone)) {
+						showError("phone","手机号格式不正确");
+					}else {
+						showSuccess("phone");
+					}
+				});
+
+				<!-- 真实姓名验证 -->
+				$("#realName").on("blur",function () {
+					var realName = $.trim($("#realName").val());
+					if ("" == realName) {
+						showError("realName","请输入真实姓名");
+					} else if (!/^[\u4e00-\u9fa5]{0,}$/.test(realName)) {
+						showError("realName","只能是中文名称");
+					} else {
+						showSuccess("realName");
+					}
+				});
+
+				<!-- 身份证号码验证 -->
+				$("#idCard").on("blur",function () {
+					var idCard = $.trim($("#idCard").val());
+					if ("" == idCard) {
+						showError("idCard","身份证号码不能为空");
+					} else if (!/(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/.test(idCard)) {
+						showError("idCard","请输入正确的身份证号")
+					} else {
+						showSuccess("idCard");
+					}
+				});
+			
+p2p-093-实名认证-发起验证请求
+		1. 发送短信验证码
+		2. 直接复制之前的代码，并修改
+		
+		3. 认证
+				先验证，然后成功后，还是暂时跳转到首页
+
+		4. 去掉real.html页面文本框的 onblur事件
+				<!-- 注册 -->
+    $("#btnRegist").on("click",function () {
+        $("#phone").blur();
+        $("#realName").blur();
+        $("#idCard").blur();
+        $("#messageCode").blur();
+
+        // 如果没有错误信息则发出请求
+        var errorText =   $("div[id$='Err']").text();
+        if ("" == errorText) {
+            // 发出请求
+            $.ajax({
+                url: "/loan/realName",
+                type: "post",
+                data: {
+                    "phone":$.trim($("#phone").val()),
+                    "realName":$.trim($("#realName").val()),
+                    "idCard":$.trim($("#idCard").val()),
+                    "messageCode":$.trim($("#messageCode").val())
+                },
+                success:function (data) {
+                        if (data.code == 1) {
+							window.location.href = "/p2p/index"	
+                        } else {
+                            $("#messageCode").val("");
+                            showError("messageCode",data.message);
+                        }
+                },
+                error:function () {
+                    $("#messageCode").val("");
+                    showError("messageCode","系统异常");
+                }
+
+            });
+        }
+
+    });
+				
+				
+				
+p2p-094-实名认证-后台实现
+		{
+			"code": "10000",
+			"charge": false,
+			"remain": 1305,
+			"msg": "查询成功",
+			"result": {
+				"error_code": 0,
+				"reason": "成功",
+				"result": {
+					"realname": "乐天磊",
+					"idcard": "350721197702134399",
+					"isok": true
+				}
+			}
+	}
+	
+	 @RequestMapping(value = "/loan/realName")
+    public Result toRealName(HttpServletRequest request,
+                             @RequestParam(value = "phone", required = true) String phone,
+                             @RequestParam(value = "realName", required = true) String realName,
+                             @RequestParam(value = "idCard", required = true) String idCard,
+                             @RequestParam(value = "messageCode", required = true) String messageCode) {
+
+        // 调用第三方接口
+        try {
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("appkey","0e97b3c5e497b7637867e71c44a42b1e");
+            paramMap.put("cardNo",idCard);
+            paramMap.put("realName",realName);
+            //String jsonString = HttpClientUtils.doPost("https://way.jd.com/youhuoBeijing/test",paramMap);
+            String jsonString = "{\n" +
+                    "    \"code\": \"10000\",\n" +
+                    "    \"charge\": false,\n" +
+                    "    \"remain\": 1305,\n" +
+                    "    \"msg\": \"查询成功\",\n" +
+                    "    \"result\": {\n" +
+                    "        \"error_code\": 0,\n" +
+                    "        \"reason\": \"成功\",\n" +
+                    "        \"result\": {\n" +
+                    "            \"realname\": \"乐天磊\",\n" +
+                    "            \"idcard\": \"350721197702134399\",\n" +
+                    "            \"isok\": true\n" +
+                    "        }\n" +
+                    "    }\n" +
+                    "}";
+            // 把json格式的字符串转成json对象
+            JSONObject jsonObject = JSONObject.parseObject(jsonString);
+            // 从json对象中获取相关信息
+            String code = jsonObject.getString("code");
+            if (!StringUtils.equals(code,"1000")) {
+                // 通信异常
+                return Result.error("通信异常");
+            }
+
+            // 获取isok判断是否返回成功
+            Boolean isOk = jsonObject.getJSONObject("result").getJSONObject("result").getBoolean("isok");
+            if (!isOk) {
+                return Result.error("姓名与身份证匹配失败");
+            }
+
+            // 从session中获取User
+            User sessionUser = (User)request.getSession().getAttribute(Constants.SESSION_USER);
+            User updateUser = new User();
+            updateUser.setId(sessionUser.getId());
+            updateUser.setPhone(phone);
+            updateUser.setIdCard(idCard);
+            updateUser.setName(realName);
+            // 将真实信息更新到用户表
+            int row = userService.updataByUserId(updateUser);
+            if (row <= 0) {
+                return Result.error("系统繁忙");
+            }
+            // 需要再次对数据库进行查询
+            User user = userService.queryUserByPhone(phone);
+            // 更新session中的信息
+            request.getSession().setAttribute(Constants.SESSION_USER,user);
+
+
+
+
+        }catch (Exception e) {
+            e.printStackTrace();
+            return Result.error("通信异常，请稍后重试");
+        }
+        return Result.success();
+    }
+	
+p2p-095-实名认证-后台实现
+		1. 加上判断验证码是否正确。然后在往下进行
+		2. 测试从用户注册到实名认证
+	
+p2p-096-展示注册后用户登录状态
+		1. 但用户已经是登录状态的时候 ，我们让页面(首页)显示用户的名称或者手机号。而不是广告
+		2. 先修改首页
+				 <div th:if="${session.user eq null}">
+				</div>
+				
+				<div th:unless="${session.user eq null}">
+				</div>
+				“<b th:text="${session.user.phone}">张三</b>”
+				
+		3. 将上方的登陆注册等按钮也判断一下
+		
+		将余额 <span id="frame_top">--</span>元
+
+p2p-097-展示注册后用户登录状态
+		1. 在首页 有个/js/trafficStatistics.js
+		2. //登录后个人信息提示
+			//个人信息下拉
+			$.ajax({
+				url:"/p2p/loan/myFinanceAccount",
+				type:"get",
+				success:function (data) {
+					$("#frame_top").html(data.availableMoney);
+				}
+			});
+
+		3. UserController 
+			@RequestMapping(value = "/loan/myFinanceAccount")
+			@ResponseBody
+			public FinanceAccount myFinanceAccount(HttpServletRequest request) {
+				User sessionUser = (User) request.getSession().getAttribute(Constants.SESSION_USER);
+				FinanceAccount financeAccount = financeService.queryFinanceAccountByUid(sessionUser.getId());
+				return financeAccount;
+			}
+		4.  注意  
+				不能调用mapper中的selectByPrimaryKey 
+				而是需要自己新建一个
+									
+						
+p2p-098-用户退出
+	1. 找到
+			<div class="exit"><a th:href="@{/loan/logout}">退出</a></div>
+	2. UserController	
+			 @RequestMapping(value = "/loan/logout")
+			public String logoutUser(HttpServletRequest request) {
+				// 退出登录有两种方式
+				//1. 将session设置为失效状态(不建议)
+				request.getSession().invalidate();
+				//2. 删除session中的用户信息
+				//request.getSession().removeAttribute(Constants.SESSION_USER);
+				// 注意，不能直接调整到index 而是重定向
+				return "redirect:/index";    // 这里的/表示上下文跟 p2p
+			}
+			
+			注意：最后不能直接跳转到首页
+			
+p2p-099-用户登录-1
+		1. 查看header和index.html中的登录按钮
+		2. 在UserController中添加方法
+			 @RequestMapping(value = "/loan/page/login")
+			public String pageLogin(HttpServletRequest request, Model model) {
+				return "login";
+			}
+		3. 将登录页的图片验证改为短信验证
+	
+				
+
+p2p-100-用户登录-2
+		1. 点击获取验证码要实现的功能
+				1. 实现倒计时效果
+		2. 验证
+		
+p2p-101-用户登录-3
+		1. 登录时验证
+				并对密码加长
+		2. 验证通过后ajax请求
+				先不处理成功后的情况，
+				只处理失败
+						失败后手机号和密码清空并显示错误信息
+						
+p2p-102-用户登录-4
+		1. UserController
+				@RequestMapping(value = "/loan/login")
+				public @ResponseBody Result login(HttpServletRequest request,
+									@RequestParam(value = "phone", required = true) String phone,
+									@RequestParam(value = "loginPassword",required = true) String loginPassword,
+									@RequestParam(value = "messageCode", required = true) String messageCode) {
+
+					try {
+						// 判断验证码是否正确
+						String redisMessageCode = redisService.get("phone");
+						if (!StringUtils.equals(messageCode,redisMessageCode)) {
+							return Result.error("验证码不错误Controller....");
+						}
+
+						// 请求登录[登录时1. 验证用户名和密码是否正确，更新登录时间所以要通道事务]
+						User user = userService.login(phone,loginPassword);
+
+						// 将用户信息存放到session中
+						request.getSession().setAttribute(Constants.SESSION_USER,user);
+
+					}catch (Exception e) {
+						e.printStackTrace();
+						return Result.error("登录失败");
+					}
+					return Result.success();
+				}					
+			
+		2.  <!-- 验证手机号和密码是否正确 -->
+			  <select id="selectUserByPhoneAndLoginPassword" resultMap="BaseResultMap" >
+					select
+						<include refid="Base_Column_List" />
+					from
+						u_user
+					where
+						phone = #{phone} and login_password = #{loginPassword}
+						
+				</select>
+				
+				$.ajax({
+			url:"/loan/login",
+			type:"get",
+			data:{
+				"phone":phone,
+				"loginPassword":$.md5(loginPassword)
+			},
+			success:function (data) {
+				if (data.nessage == 1) {
+					window.location.href = "/index";
+				}
+			},
+			error:function () {
+
+			}
+
+p2p-103-产品详情页面展示帐户余额
+			1. 判断session中有没有数据
+			2. 如果有的话，则查询数据库 参数是userID
+			3. 金额进行格式化再显示
+				th:text="|${#numbers.formatCurrency(financeAccount.availableMoney)}元|"
+				
+p2p-104-用户中心作业
+			1. 添加用户用心MyCenter.html
+			2.  @RequestMapping(value = "/loan/myCenter")
+					public String myCenter(HttpServletRequest request, Model model)  {
+						// 先获取session中的数据
+						
+						User sessoinUser = (User)request.getSession().getAttribute(Constants.SESSION_USER);
+						// 根据用户id查询投资信息
+						FinanceAccount financeAccount = financeService.queryFinanceAccountByUid(sessoinUser.getId());
+						model.addAttribute("financeAccount",financeAccount);
+
+						return "myCenter";
+					}
+			3. th:text="${#numbers.formatCurrency(financeAccount.availableMoney)}
+				th:text="|最近登录：${#dates.format(session.user.lastLoginTime,'yyyy-MM-dd HH:mm:ss')}|"	
+
+
+p2p-106-用户投资-1
+		商品详情页中的投资
+				1.  立即投资的前提
+						1. 必须是登陆用户
+						2. 只能输入数字
+						3. 投资的产品必须是可以投资的状态
+						4. 余额必须够用
+				2. 增值功能，在用户输入金额后会自动计算大概的收益。
+				
+				3. 在多线程的情况下，可能促销超卖问题
+						如何解决：使用乐观锁
+						
+				
+p2p-107-用户投资-2
+		1. 产品详情页面没有页脚，先参考首页，把页脚引进来
+		2. <!-- 投资收益 -->
+			function checkMoney() {
+				var bidMoney = $.trim($("#bidMoney").val());
+				// 产品类型(计算是日利率使用)
+				var productType = [[${loanInfo.productType}]];
+				// 产品年利率
+				var rate = [[${loanInfo.rate}]];
+				// 产品投资周期
+				var cycle = [[${loanInfo.cycle}]];
+				if ("" == bidMoney) {
+					$(".max-invest-money").html("对不起，投资金额不能为空");
+				} else if(isNaN(bidMoney)) {
+					$(".max-invest-money").html("对不起，投资金额只能是数字");
+				} else if (bidMoney <= 0) {
+					$(".max-invest-money").html("对不起，投资金额不能是负数");
+				} else if (bidMoney % 100 != 0) {
+					$(".max-invest-money").html("对不起，投资金额只能是100的整数倍");
+				} else {
+					$(".max-invest-money").html("");
+					// 年化收益金额 = 投资金额 * 年化利率
+					// 收益金额 = 投资金额 * 日利率 * 投资天数
+					var incomeMoney = null;
+					if ("0" == productType) {
+						// 新手宝
+						incomeMoney = bidMoney * (rate / 100 / 365) * cycle;
+					} else {
+						// 优选、散标
+						incomeMoney = bidMoney * (rate / 100 / 365) * cycle*30;
+					}
+					incomeMoney= Math.round(incomeMoney*Math.pow(10,2))/Math.pow(10,2);
+					$("#shouyi").html(incomeMoney);
+				}
+				
+		判断数据是否合法，然后计算收益
+		
+p2p-108-用户投资-3	
+		function invest() {
+			if (checkMoney()) {
+				// 在上面的验证的基础上在进行投资
+				//1.验证用户是否登录
+				// 输入的投资金额
+				var bidMoney = $.trim($("#bidMoney").val());
+				var user = $.trim($("#user").val());
+				var name = $.trim($("#name").val());
+				// 最大允许投资金额和最小允许投资金额
+											   
+				var bidMinLimit = [[${loanInfo.bidMinLimit}]];
+				var bidMaxLimit = [[${loanInfo.bidMaxLimit}]];
+				var left_product_money = [[${loanInfo.leftProductMoney}]];
+				var availableMoney = $.trim($("#availableMoney").val());  // 用户可用金额
+
+				if (""== user) {
+					// 当前用户没有登录，跳转到登录页面
+					window.location.href="/loan/page/login";
+				} else if ("" == name) {
+					// 虽然登录了，但是没有实名认证
+					window.location.href="/p2p/loan/realName";
+				} else if (parseFloat(bidMoney) < parseFloat(bidMinLimit)) {
+					alert("走你");
+					$(".max-invest-money").html("投资金额不能小于" + bidMinLimit + "元");
+				} else if (parseFloat(bidMoney) > parseFloat(bidMaxLimit)) {
+					$(".max-invest-money").html("投资金额不能大于" + bidMaxLimit + "元");
+				} else if (parseFloat(bidMoney) > parseFloat(left_product_money)) {
+					$(".max-invest-money").html("投资金额不能大于产品可投金额");
+				} else if (parseFloat(bidMoney) > parseFloat(availableMoney)) {
+					$(".max-invest-money").html("你的余额不足，请充值后再进行投资");
+				} else {
+					// 开始投资
+					$.ajax({
+						url:,
+						type:"post",
+						data:{
+							"loanId":loanId,
+							"bidMoney":bidMoney
+						},
+						success:function (data) {
+							if (data.code == 1) {
+							   
+							} else {
+								$(".max-invest-money").html("投资人数过多，请稍后重试");
+							}
+						},
+						error:function() {
+								$(".max-invest-money").html("投资人数过多，请稍后重试");
+						}
+					})
+				}
+			}
+		}
+		
+		注意：上面用到的一些数据保存在隐藏域中
+		
+
+p2p-109-用户投资-4
+		1. 创建BidInfoController
+		2. 内容
+		@Reference(interfaceClass = BidInfoService.class, version = "1.0.0", check = false)
+		private BidInfoService bidInfoService;
+
+		@RequestMapping(value = "/loan/invest")
+		public @ResponseBody Result invest(HttpServletRequest request,
+						   @RequestParam(value = "loanId", required = true) Integer loanId,
+						   @RequestParam(value = "bidMoney", required = true) Double bidMoney) {
+			try {
+				User sessionUser = (User) request.getSession().getAttribute(Constants.SESSION_USER);
+				Map<String, Object> paramMap = new HashMap<>();
+				paramMap.put("uid",sessionUser.getId());
+				paramMap.put("loanId",loanId);
+				paramMap.put("bidMoney",bidMoney);
+
+				// 用户投资（1. 更新产品可投金额 2. 更新账户可用余额 3. 新增投资记录 4. 判断产品是否满标）
+				// 以上需要的参数 产品标示(ID) 投资金额 用户标示
+				bidInfoService.invest(paramMap);
+			}catch (Exception e) {
+				e.printStackTrace();
+				Result.error("投资失败");
+			}
+			return Result.success();
+		}
+					
+		3.  业务列
+    @Transactional
+    @Override
+    public void invest(Map<String, Object> paramMap) throws Exception {
+        // 更新产剩余可投金额
+        Integer uid = (Integer) paramMap.get("uid");
+        Integer loanId = (Integer) paramMap.get("loanId");
+        Double bidMoney = (Double) paramMap.get("bidMoney");
+        // 解决超卖问题
+        LoanInfo loanInfo = loanInfoMapper.selectByPrimaryKey(loanId);
+        Integer version = loanInfo.getVersion();
+        paramMap.put("version",version);
+
+        int updateLeftProductMoneyCount = loanInfoMapper.updateLeftProductMoney(paramMap);
+        if (updateLeftProductMoneyCount <= 0) {
+            throw new Exception("更新产品可投金额失败");
+        }
+
+
+
+        // 更新账户可用余额
+        int updateFinanAccountCount = financeAccountMapper.updateFinanceAccountMoney(paramMap);
+        if (updateFinanAccountCount <= 0) {
+            throw new Exception("更新账户可用余额失败");
+        }
+        // 新增投资记录
+        BidInfo bidInfo = new BidInfo();
+        bidInfo.setUid(uid);
+        bidInfo.setLoanId(loanId);
+        bidInfo.setBidMoney(bidMoney);
+        bidInfo.setBidTime(new Date());
+        bidInfo.setBidStatus(1);
+
+        int insertSelectiveCount = bidInfoMapper.insertSelective(bidInfo);
+        if (insertSelectiveCount <= 0) {
+            throw new Exception("更新投资记录失败");
+        }
+
+        // 判断是否满标
+        // 查询产品信息
+        LoanInfo loanInfoDetail = loanInfoMapper.selectByPrimaryKey(loanId);
+        if (0 == loanInfoDetail.getLeftProductMoney()) {
+            loanInfoDetail.setId(loanId);
+            loanInfoDetail.setProductStatus(1);
+            loanInfoDetail.setProductFullTime(new Date());
+            int updateByPrimaryKeySelectiveCount = loanInfoMapper.updateByPrimaryKeySelective(loanInfoDetail);
+
+            if (updateByPrimaryKeySelectiveCount <= 0) {
+                throw new Exception("");
+            }
+        }
+    }
+	4. mapper
+		  <update id="updateLeftProductMoney">
+			update
+			  b_loan_info
+			set
+				left_product_money = left_product_money - #{bidMoney},
+				version = version + 1
+			where
+				id = #{loanId} and version = #{version} and (left_product_money - #{bidMoney}) >= 0
+
+			</update>
+
+p2p-110-用户投资-5
+		启动并测试	
+		
+p2p-111-用户投资-总结
+
+p2p-112-用户投资排行榜-1
+
+	
+
+	1. BidInfoServiceImpl
+		用户投资后
+	//将用户投资的信息存放到redis缓存中
+        redisTemplate.opsForZSet().incrementScore(Constants.INVEST_TOP,phone,bidMoney);
+
+	2. Constans
+
+		   /**
+		     * 投资排行榜
+		     */
+		    public static final String INVEST_TOP = "investTop";
+
+		
+
+p2p-113-用户投资排行榜-2
+
+	1. LoanInfoController
+		//获取用户投资排行榜
+		List<BidUser> bidUserList = bidInfoService.queryBidUserTop();
+		model.addAttribute("bidUserList",bidUserList);
+
+
+	2、 BidInfoServiceImpl
+		 public List<BidUser> queryBidUserTop() {
+		List<BidUser> bidUserList = new ArrayList<BidUser>();
+
+		//从redis中获取投资排行榜
+		Set<ZSetOperations.TypedTuple<Object>> set = redisTemplate.opsForZSet().reverseRangeWithScores(Constants.INVEST_TOP, 0, 5);
+
+		//获取集合的迭代器
+		Iterator<ZSetOperations.TypedTuple<Object>> iterator = set.iterator();
+
+		//循环遍历
+		while (iterator.hasNext()) {
+
+		    ZSetOperations.TypedTuple<Object> next = iterator.next();
+		    String phone = (String) next.getValue();
+		    Double score = next.getScore();
+
+		    BidUser bidUser = new BidUser();
+		    bidUser.setPhone(phone);
+		    bidUser.setScore(score);
+
+		    bidUserList.add(bidUser);
+		}
+
+
+		return bidUserList;
+	    }
+
+	 3. BidUser
+	 	public class BidUser implements Serializable {
+
+		    /**
+		     * 手机号码
+		     */
+		    private String phone;
+
+		    /**
+		     * 分数
+		     */
+		    private Double score;
+
+
+		}
+
+p2p-114-用户投资排行榜-3
+	1。页面实现
+	2/测试	
+	
+p2p-116-生成收益计划-功能分析
+	1. 何时生成收益计划？
+		产品满标以后，也就是投资产品信息表中的投资状态为1的
+	2. 何时去查询这些产品投资状态为1的?
+		难点
+
+
+p2p-117-spring task定时器		
+	1. 资料：010-spring-task
+	2. cron表达式
+
+
+
+p2p-118-搭建定时器工程
+	1. 该工程属于消费者，而该消费者的请求不再是通过浏览器去消费，而是系统本身(触发时间后)
+	2. 新建SpringBoot web工程
+			007-p2p-timer
+	3. 修改定时器工程的父工程
+	4. 导入如下依赖
+		dubbo依赖
+		zookeeper注册中心依赖
+		接口工程
+	5. 核心配置文件
+		server.port = 8082
+		server.servlet.context-path=/
+
+		spring.application.name=p2p-timer
+		spring.dubbo.registry=zookeeper://ip:2181
+
+p2p-119-编写SpringTask定时器例子	
+	1. 在timer包下创建类 TimerManager
+		1.1 将该类交给Spring容器管理(在类上加上@Component注解)
+		1.2 编写如下方法
+			@Scheduled(cron = "0/5 * * * * ?")
+			public void test() {
+				System.out.println("==任务开始==");
+				System.out.println("==任务结束==");
+			}
+	2. 启动并测试
+		2.1 在启动之前需要在Application类上添加如下注解
+			@EnableDubboConfiguration
+			@EnableScheduling   //开启Spring Task 定时器任务配置
+
+
+p2p-120-生成收益计划-功能实现-1
+	1. 将定时器工程的中test方法改名为generateIncomePlan
+	2. 修改输出语句方便查看
+			System.out.println("==生成收益计划开始==");
+			System.out.println("==生成收益计划结束==");
+
+	3. 生成收益计划的操作跟income相关 
+		TimerManager类如下
+
+			private IncomeRecordService incomeRecordService;
+
+			System.out.println("==生成收益计划开始==");
+			incomeRecordService.genrateIncomePlan();
+			System.out.println("==生成收益计划结束==");
+
+	4. 创建
+		IncomeRecordService接口(借口工程中)
+		IncomeRecordService接口的实现类(服务提供者中)
+
+	5. IncomeRecordService接口的实现类 实现的工程分析
+		1. 通过p2p-bak.pdm分析
+			1.1 查询投标产品表中所有投资状态为1的产品(List<投资产品>)
+			1.2 根据上面查询到的信息获取用户投资信息
+			1.3 根据用户投资信息生成用户收益
+		2. 代码分析
+			void genrateIncomePlan() {
+				// 获取产品状态为1的已满标的产品  -->返回List<已满标产品>
+				// 循环遍历List<已满标产品>，获取每一个产品
+					//获取当前满标产品的所有的投资记录 --> 返回List<投资记录>
+					//循环遍历List<投资记录> 获取每一条投资记录
+						// 将当前的投资记录生成对应的收益计划
+				// 更新当前产品的状态为2，满标且生成收益计划
+			}
+
+p2p-121-生成收益计划-功能实现-2
+	1. 在IncomeRecordServiceImpl.java类中实现上面的代码
+		@Component
+@Service(interfaceClass = IncomeRecordService.class,version = "1.0.0",timeout = 15000)
+public class IncomeRecordServiceImpl implements IncomeRecordService {
+
+    @Autowired
+    private IncomeRecordMapper incomeRecordMapper;
+
+    @Autowired
+    private LoanInfoMapper loanInfoMapper;
+
+    @Autowired
+    private BidInfoMapper bidInfoMapper;
+
+    @Autowired
+    private FinanceAccountMapper financeAccountMapper;
+
+    @Transactional
+    @Override
+    public void generateIncomePlan() throws Exception {
+
+        //查询产品状态为1已满标的产品 -> 返回List<已满标产品>
+        List<LoanInfo> loanInfoList = loanInfoMapper.selectLoanInfoListByProductStatus(1);
+
+        //循环遍历,获取到每一个产品
+        for (LoanInfo loanInfo : loanInfoList) {
+
+            //获取当前产品的所有投资记录 -> 返回List<投资记录>
+            List<BidInfo> bidInfoList = bidInfoMapper.selectBidInfoListByLoanId(loanInfo.getId());
+
+            //循环遍历,获取到每一个投资记录
+            for (BidInfo bidInfo : bidInfoList) {
+
+                //将当前的投资记录生成对应的收益计划
+                IncomeRecord incomeRecord = new IncomeRecord();
+                incomeRecord.setUid(bidInfo.getUid());
+                incomeRecord.setLoanId(loanInfo.getId());
+                incomeRecord.setBidMoney(bidInfo.getBidMoney());
+                incomeRecord.setBidId(bidInfo.getId());
+                incomeRecord.setIncomeStatus(0);
+
+                //收益时间(Date) = 产品满标时间(Date) + 产品周期(int 天|月)
+                Date incomeDate = null;
+
+                //收益金额 = 投资金额 * 日利率 * 天数;
+                Double incomeMoney = null;
+
+                //判断当前产品的类型
+                if (Constants.PRODUCT_TYPE_X == loanInfo.getProductType()) {
+                    //新手宝
+                     incomeDate = DateUtils.addDays(loanInfo.getProductFullTime(), loanInfo.getCycle());
+                     incomeMoney = bidInfo.getBidMoney() * (loanInfo.getRate() / 100 / 365) * loanInfo.getCycle();
+                } else {
+                    //优选或散标
+                    incomeDate = DateUtils.addMonths(loanInfo.getProductFullTime(),loanInfo.getCycle());
+                    incomeMoney = bidInfo.getBidMoney() * (loanInfo.getRate() / 100 / 365) * loanInfo.getCycle()*30;
+                }
+
+                incomeMoney = Math.round(incomeMoney*Math.pow(10,2))/Math.pow(10,2);
+
+                incomeRecord.setIncomeDate(incomeDate);
+                incomeRecord.setIncomeMoney(incomeMoney);
+
+                incomeRecordMapper.insertSelective(incomeRecord);
+            }
+
+            //更新当前产品的状态为2满标且生成收益计划
+            LoanInfo updateLoanInfo = new LoanInfo();
+            updateLoanInfo.setId(loanInfo.getId());
+            updateLoanInfo.setProductStatus(2);
+            int i = loanInfoMapper.updateByPrimaryKeySelective(updateLoanInfo);
+            if (i <= 0) {
+                throw new Exception("当前产品标识为:"+loanInfo.getId()+"的状态从1更新成2失败");
+            }
+        }
+
+    }
+
+
+p2p-122-生成收益计划-功能实现-3
+	1. 计算出收益时间和收益金额
+		//收益时间(Date) = 产品满标时间(Date) + 产品周期(int 天|月)
+                Date incomeDate = null;
+
+                //收益金额 = 投资金额 * 日利率 * 天数;
+                Double incomeMoney = null;
+
+                //判断当前产品的类型
+                if (Constants.PRODUCT_TYPE_X == loanInfo.getProductType()) {
+                    //新手宝
+                     incomeDate = DateUtils.addDays(loanInfo.getProductFullTime(), loanInfo.getCycle());
+                     incomeMoney = bidInfo.getBidMoney() * (loanInfo.getRate() / 100 / 365) * loanInfo.getCycle();
+                } else {
+                    //优选或散标
+                    incomeDate = DateUtils.addMonths(loanInfo.getProductFullTime(),loanInfo.getCycle());
+                    incomeMoney = bidInfo.getBidMoney() * (loanInfo.getRate() / 100 / 365) * loanInfo.getCycle()*30;
+                }
+
+                incomeMoney = Math.round(incomeMoney*Math.pow(10,2))/Math.pow(10,2);
+
+                incomeRecord.setIncomeDate(incomeDate);
+                incomeRecord.setIncomeMoney(incomeMoney);
+
+                incomeRecordMapper.insertSelective(incomeRecord);
+            }
+
+	2. 更新当前产品的状态为2，满标且生成收益计划
+		   //更新当前产品的状态为2满标且生成收益计划
+		    LoanInfo updateLoanInfo = new LoanInfo();
+		    updateLoanInfo.setId(loanInfo.getId());
+		    updateLoanInfo.setProductStatus(2);
+		    int i = loanInfoMapper.updateByPrimaryKeySelective(updateLoanInfo);
+		    if (i <= 0) {
+			throw new Exception("当前产品标识为:"+loanInfo.getId()+"的状态从1更新成2失败");
+		    }
+
+
+p2p-123-生成收益计划-功能实现-4
+	
+	没有页面，只能通过sql语句进行测试
+	开启spring task定时器前进行测试
+	select * from b_loan_info where product_status = 1;
+	select * from b_bid_info where loan_id in(xx,xx,..);  
+	select * from b_income_record where loan_id in(xx,xx,..);
+
+	开启spring task定时器后进行测试
+	select * from b_loan_info where product_status = 1;
+	select * from b_bid_info where loan_id in(xx,xx,..);  
+	select * from b_income_record where loan_id in(xx,xx,..);
+
+
+p2p-124-返还收益-1
+	1. 在timer工程中的TimerManager类中添加方法(可以先讲生成收益的@Scheduled(cron = "0/5 * * * * ?")注释掉)
+		1.1 添加方法
+		    @Scheduled(cron = "0/5 * * * * ?")
+		    public void generateIncomeBack() {
+			log.info("---------------收益返还开始--------------------");
+
+			incomeRecordService.generateIncomeBack();
+
+			log.info("---------------收益返还结束--------------------");
+
+		    }
+
+	2. 在IncomeRecordService接口中创建方法
+	3. IncomeRecordService接口的实现类generateIncomeBack()方法的实现
+		 @Override
+		    public void generateIncomeBack() {
+
+			//获取收益记录状态为0且收益时间等于当前时间的收益计划 -> 返回List<收益计划>
+			List<IncomeRecord> incomeRecordList = incomeRecordMapper.selectIncomeRecordListByIncomeStatusAndCurDate(0);
+
+			Map<String,Object> paramMap = new HashMap<String, Object>();
+
+			//循环遍历,获取到每一条收益计划
+			for (IncomeRecord incomeRecord : incomeRecordList) {
+
+			    paramMap.put("uid",incomeRecord.getUid());
+			    paramMap.put("bidMoney",incomeRecord.getBidMoney());
+			    paramMap.put("incomeMoney",incomeRecord.getIncomeMoney());
+
+			    //将投资的本金和利息返还给对应用户的帐户
+			    int updateCount = financeAccountMapper.updateFinanceAccountByIncomeBack(paramMap);
+
+			    //将当前收益计划的状态更新为1已返还
+			    IncomeRecord updateIncome = new IncomeRecord();
+			    updateIncome.setId(incomeRecord.getId());
+			    updateIncome.setIncomeStatus(1);
+			    incomeRecordMapper.updateByPrimaryKeySelective(updateIncome);
+			}
+
+		    }
+
+	4. 
+		先查询收益记录状态为0且收益时间等于当前时间的收益计划
+		select
+		 *
+		from
+		  b_income_record
+		where
+		  income_status = 0 and income_date = curdate()
+		由于数据库中的数据不正确，所以需要修改收益时间
+
+		update
+		    b_income_record
+		set
+		    income_data = curdate()
+		where
+		    loan_id in(xx,xxx,...);
+
+	 <!--获取收益记录状态为0且收益时间等于当前时间的收益计划-->
+	    <select id="selectIncomeRecordListByIncomeStatusAndCurDate" resultMap="BaseResultMap">
+		select
+		  <include refid="Base_Column_List"/>
+		from
+		  b_income_record
+		where
+		  income_status = #{incomeStatus} and income_date = curdate()
+	    </select>
+
+	4. financeAccountMapper.xml文件
+	 <!--更新帐户余额:收益返还-->
+	    <update id="updateFinanceAccountByIncomeBack">
+		update
+		  u_finance_account
+		set
+		  available_money = available_money + #{bidMoney} + #{incomeMoney}
+		where
+		  uid = #{uid}
+	    </update>
+		
+p2p-125-返还收益-2
+		1. 启动服务提供者
+		   启动消费者(Spring task)
+
+		2. 测试
+				
+				
+p2p-126-展示选择充值页面
+	1. 先跳转到充值页面
+		@RequestMapping(value = "/loan/page/toRecharge")
+			public String toRecharge() {
+
+				return "toRecharge";
+			}
+	2. 分析页面
+			把一个form表单改成两个，
+			<input type="hidden" id="payType"/>  //该值用于判断支付类型 
+			 <form id="wxRechargeForm" th:action="@{/loan/toWxRecharge}" method="post" target="_blank">
+                     <input type="hidden" id="wxRechargeMoney" name="rechargeMoney"/>
+              </form>
+			  
+			 //选择第三种支付方式 单击事件中
+			  $("#payType").val("aliPay");
+			  或
+			  $("#payType").val("wxPay");
+			  
+			在提交表单中进行判断payType的值来选择提交的form并带上金额
+			 function submitForm() {
+            var payType = $("#payType").val();
+            var rechargeMoney = $("#rechargeMoney").val();
+            if (checkData()) {
+                $(".input_text").removeClass("input-red");
+                $("#div1_1").hide();
+                $("#dialog-overlay").show();
+                $("#failurePayment").show();
+                if (payType == "aliPay") {
+                    $("#aliPayRechargeMoney").val(rechargeMoney);
+                    $("#aliPayRechargeForm").submit();
+                } else {
+                    $("#wxPayRechargeMoney").val(rechargeMoney);
+                    $("#wxPayRechargeForm").submit();
+                }
+
+            }
+        }
+			
+			  
+			  
+			  
+			  
+	3. 创建RechargeMoneyController类并打断点测试是否能正常跳转
+			
+
+			@RequestMapping(value = "/loan/aliPaytoRecharge")
+			public void toAlipayRecharge(HttpServletRequest request,
+										 @RequestParam(value = "rechargeMoney", required = true) Double rechargeMoney) {
+				System.out.println("==========================");
+			}
+
+
+			@RequestMapping(value = "/loan/wxPaytoRecharge")
+			public void toWxpayRecharge(HttpServletRequest request,
+										 @RequestParam(value = "rechargeMoney", required = true) Double rechargeMoney) {
+				System.out.println("==========================");
+			}		
+
+
+p2p-128-微信支付产品介绍
+
+p2p-129-微信支付产品-NATIVE支付产品介绍
+		1. 重点 Native支付是指商户系统按微信支付协议生成支付二维码，用户再用微信“扫一扫”完成支付的模式
+		2. 进入文档	
+		https://pay.weixin.qq.com/wiki/doc/api/index.html
+
+
+
+
+
+						
+						
+p2p-130-微信支付产品-NATIVE支付产品-名词解释	
+
+
+p2p-131-微信支付产品-NATIVE支付产品-支付帐户
+		详见资料--微信支付-  wxpay-config.txt
+
+p2p-132-微信支付产品-NATIVE支付产品-场景介绍
+
+
+p2p-133-微信支付产品-NATIVE支付产品-场景介绍-模式二	
+
+p2p-134-微信支付产品-NATIVE支付产品-场景介绍-模式二-统一下单API接口
+
+p2p-135-微信支付产品-NATIVE支付产品-场景介绍-模式二-时序图
+
+
+
+p2p-136-二维码介绍
+			1.  二维码介绍
+			2. 生成二维码的第三方框架(草料)
+			3. 
+			
+			生成一个二维码
+			
+
+p2p-137-生成二维码
+				
+			1. 创建一个maven java模块 QRCode
+			2. 添加依赖
+				<dependencies>
+				<!-- google生成二维码依赖 -->
+				<dependency>
+				    <groupId>com.google.zxing</groupId>
+				    <artifactId>core</artifactId>
+				    <version>3.0.0</version>
+				</dependency>
+
+				<dependency>
+				    <groupId>com.google.zxing</groupId>
+				    <artifactId>javase</artifactId>
+				    <version>3.0.0</version>
+				</dependency>
+			    </dependencies>
+
+			2. 代码
+				public static void main(String[] args) throws WriterException, IOException {
+				Map<EncodeHintType,Object> encodeHintTypeObjectMap = new HashMap<>();
+				encodeHintTypeObjectMap.put(EncodeHintType.CHARACTER_SET,"UTF-8");
+				// 创建一个矩阵对象
+				BitMatrix bitMatrix = new MultiFormatWriter().encode("hello world", BarcodeFormat.QR_CODE,200,200,encodeHintTypeObjectMap);
+
+				String filePath = "e://";
+				String fileName = "qrcode.png";
+
+				Path path = FileSystems.getDefault().getPath(filePath,fileName);
+
+				// 将矩阵对象转为二维码图片
+				MatrixToImageWriter.writeToPath(bitMatrix,"png",path);
+			}	
+			
+p2p-138-微信扫码支付
+		1. RechargeRecodeController
+			生成充值记录
+				@RequestMapping(value = "/loan/toWxRecharge")
+				public String toWxpayRecharge(HttpServletRequest request, Model model,
+											 @RequestParam(value = "rechargeMoney", required = true) Double rechargeMoney) {
+					try {
+						// 发起微信支付
+						String rechargeNo = "";
+						// 生成充值记录
+						// 从session中获取用户信息
+						User sessionUser = (User) request.getSession().getAttribute(Constants.SESSION_USER);
+
+						RechargeRecord rechargeRecord = new RechargeRecord();
+						rechargeRecord.setUid(sessionUser.getId());
+						rechargeRecord.setRechargeMoney(rechargeMoney);
+						rechargeRecord.setRechargeStatus("0"); //0 充值中、1. 充值成功、 2 充值失败
+						rechargeRecord.setRechargeTime(new Date());
+						rechargeRecord.setRechargeDesc("微信充值");
+
+						// 全局唯一订单号 = 时间戳 + redis唯一数字
+						rechargeNo = DateUtils.getTimestramp() + redisService.getOnlyNumber();
+
+						rechargeRecord.setRechargeNo(rechargeNo);
+
+						int rechargeRecode = rechargeRecodeService.addRechargeRecode(rechargeRecord);
+
+						if (rechargeRecode <= 0) {
+							model.addAttribute("target_msg","新增充值记录失败");
+							return "toRechargeBack";
+						}
+						
+						
+						model.addAttribute("rechargeNo",rechargeNo);
+						model.addAttribute("rechargeMoney",rechargeMoney);
+						model.addAttribute("rechargeTime",new Date());
+						
+					}catch (Exception e) {
+						e.printStackTrace();
+						model.addAttribute("target_msg","新增充值记录失败");
+						return "toRechargeBack";
+					}
+
+
+					return "showQRcode";
+				}
+				
+				 @Override
+				    public Long getOnlyNumber() {
+					return redisTemplate.opsForValue().increment(Constants.ONLY_NUMBER,1);		
+				    }
+
+    
+			    /**
+			     * 唯一数字
+			     */
+			    public static final String ONLY_NUMBER = "onlyNumber";
+
+			    public class DateUtils {
+
+			    /**
+			     * 获取时间戳
+			     * @return
+			     */
+			    public static String getTimestamp() {
+				return new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+			    }
+			}
+
+	
+			
+				
+		2. 复制一个页面
+				将toRechargeBack.html 复制成showQRcode.html
+					修改其中内容
+					 <div class="right-body">
+						<div class="leftTitle"><span class="on">微信扫码支付</span></div>
+
+						<div class="unrecognized" style = "display:block;" id="unrecognized1">
+							<h3>充值订单号:2020112022540 充值金额:1500元 充值时间:2020-10-20</h3>
+							<img th:src="@{/img/qrcode.png}">
+						</div>
+
+					</div>
+
+
+p2p-139-微信扫码支付					
+		将showQRcode.htm页面中的订单号等 改成动态数据
+		在Controller中的modul中添加订单信息
+			 <div class="unrecognized" style = "display:block;" id="unrecognized1">
+			    <h3 th:text="|充值订单号${rechargeNo} 充值金额${rechargeMoney}元 充值时间${#dates.format(rechargeTime,'yyyy-MM-dd HH:mm:ss')}|">充值订单号:2020112022540 充值金额:1500元 充值时间:2020-10-20</h3>
+			    <img th:src="@{/loan/generateQRcode(rechargeNo=${rechargeNo},rechargeMoney=${rechargeMoney})}">
+			 </div>
+			 
+		
+			
+p2p-140-微信扫码支付
+			
+			 
+			  @RequestMapping(value = "/loan/generateQRcode")
+			  public void generateQRcode(HttpServletRequest request, HttpServletResponse response,
+                               @RequestParam(value = "rechargeNo", required = true) String rechargeNo,
+                               @RequestParam(value = "rechargeMoney", required = true) Double rechargeMoney) throws Exception {
+
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("body","微信扫码支付");
+        paramMap.put("out_trade_no", rechargeNo);
+        paramMap.put("total_fee", rechargeMoney);
+
+        // 调用pay工程统一下单API接口
+        String jsonString = HttpClientUtils.doPost("http://localhost:9090/api/wxpay", paramMap);
+
+        JSONObject jsonObject = JSONObject.parseObject(jsonString);
+
+        String returnCode = jsonObject.getString("return_code");
+
+        // 判断通信标识
+        if (!StringUtils.equals("SUCCESS",returnCode)) {
+            response.sendRedirect(request.getContextPath()+"/loan/toRechargeBack");
+        }
+
+        String resultCode = jsonObject.getString("result_code");
+        if (!StringUtils.equals("SUCCESS",resultCode)) {
+            response.sendRedirect(request.getContextPath()+"/loan/toRechargeBack");
+        }
+
+        // 获取code url
+        String code_url = jsonObject.getString("code_url");
+
+        // 将code_url 生成一个二维码图片
+        Map<EncodeHintType,Object> encodeHintTypeObjectMap = new HashMap<>();
+        encodeHintTypeObjectMap.put(EncodeHintType.CHARACTER_SET,"UTF-8");
+
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(code_url, BarcodeFormat.QR_CODE,200,200,encodeHintTypeObjectMap);
+
+        OutputStream outputStream = response.getOutputStream();
+        // 将矩阵转换成流对象
+        MatrixToImageWriter.writeToStream(bitMatrix,"jpg",outputStream);
+
+        outputStream.flush();
+        outputStream.close();
+
+
+    }
+			
+		
+p2p-140-微信扫码支付
+	创建pay工程 007-p2p-pay (StringBootWeb工程)
+		1. 将该工程的父工程改成001-p2p-parent
+		2. 修改该工程的内置tomcat端口号
+				server.port=9090
+		3. 添加如下依赖
+			 <!-- 依赖公共项目 -->
+				<dependency>
+					<groupId>com.szpowernode.p2p</groupId>
+					<artifactId>002-p2p-common</artifactId>
+					<version>1.0.0</version>
+				</dependency>
+
+				<!-- 微信支付 -->
+				<!-- https://mvnrepository.com/artifact/com.github.wxpay/wxpay-sdk -->
+				<dependency>
+					<groupId>com.github.wxpay</groupId>
+					<artifactId>wxpay-sdk</artifactId>
+					<version>0.0.3</version>
+				</dependency>
+	
+	
+p2p-141-微信扫码支付	
+	@Controller
+public class WxController {
+    @RequestMapping(value = "/api/wxpay")
+    public @ResponseBody Object wxpay(@RequestParam(value = "body",required = true) String body,
+                                      @RequestParam(value = "out_trade_no",required = true) String out_trade_no,
+                                      @RequestParam(value = "total_fee",required = true) Double total_fee) throws Exception {
+
+        //拼接一个xml格式的请求参数,根节点为xml
+        //创建一个map集合的请求参数
+        Map<String,String> requestDataMap = new HashMap<String, String>();
+        requestDataMap.put("appid","wx8a3fcf509313fd74");
+        requestDataMap.put("mch_id","1361137902");
+        requestDataMap.put("nonce_str", WXPayUtil.generateNonceStr());
+        requestDataMap.put("body",body);
+        requestDataMap.put("out_trade_no",out_trade_no);
+
+        BigDecimal bigDecimal = new BigDecimal(total_fee);
+        BigDecimal multiply = bigDecimal.multiply(new BigDecimal(100));
+        int i = multiply.intValue();
+        requestDataMap.put("total_fee",String.valueOf(i));
+        requestDataMap.put("spbill_create_ip","127.0.0.1");
+        requestDataMap.put("notify_url","http://localhost:8080/loan/wxpayNotify");
+        requestDataMap.put("trade_type","NATIVE");
+        requestDataMap.put("product_id",out_trade_no);
+
+        //生成签名值
+        String signature = WXPayUtil.generateSignature(requestDataMap, "367151c5fd0d50f1e34a68a802d6bbca");
+        requestDataMap.put("sign",signature);
+
+        //将map集合的请求参数转换为xml格式的请求参数
+        String requestDataXml = WXPayUtil.mapToXml(requestDataMap);
+
+        //将请求参数传递给接口地址
+        String responseDataXml = HttpClientUtils.doPostByXml("https://api.mch.weixin.qq.com/pay/unifiedorder", requestDataXml);
+
+        //将xml格式的响应参数转换为map集合
+        Map<String, String> responseDataMap = WXPayUtil.xmlToMap(responseDataXml);
+
+
+        return responseDataMap;
+    }
+}	
+
+
+p2p-142-支付宝-电脑网站支付产品-1
+	1. open.alipay.com  支付宝开放平台
+	2. 使用支付宝扫码登录
+	3. 登录后 需要选择自研究开发者
+	4. 填写个人信息
+
+	5. 网页下方的 研发服务
+			沙箱应用
+			沙箱账号
+			沙箱钱包 仅支持Android端下载
+			
+	
+p2p-143-支付宝-电脑网站支付产品-2	
+	1. 查看文档-->网页&移动应用-->历史接口=>新版电脑网页 
+	2. 产品介绍
+		使用说明等
+
+
+
+	
+p2p-144-支付宝-电脑网站支付产品-3
+	1. 接入准备
+		1. 配置密钥
+		2. 集成并配置 SDK
+			2.1 查看开放平台服务端 SDK
+		3. 接口调用配置
+		
+p2p-145-支付宝-电脑网站支付产品-4
+	1. 快速接入-->时序图	
+		其中第七步和第八步都是响应结果，第七步需要有公网ip才能使用
+
+p2p-146-支付宝-电脑网站支付产品-5
+	了解
+	API列表
+		alipay.trade.page.pay	统一收单下单并支付页面接口
+		alipay.trade.query	统一收单线下交易查询接口
+
+
+p2p-147-支付宝-电脑网站支付产品-6		
+	SDK&DEMO
+		1. 电脑网站支付 Demo
+				下载JAVA版(资料中已经包含 alipay-->alipay.trade.page.pay-JAVA-UTF-8.zip)
+				解压缩查看项目
+		2. 创建maven web工程 实现alipay支付  （aplipay-sdk-java）
+			1. 新建maven web工程
+			2. 在src下添加java和resources目录 并设置目录属性
+			3. 在WEB-INF下创建lib目录 并将 demo中的alipay-sdk-java20170324180803.jar复制到lib目录中
+					在pom中 引入非本地仓库的依赖
+					《dependency>
+					      <groupId>com.bjpowernode.p2p</groupId>
+					      <artifactId>aplipay-sdk-java</artifactId>
+					      <version>1.0.0</version>
+					      <scope>system</scope>
+					      <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/alipay-sdk-java20170324180803.jar</systemPath>
+					</dependency>
+
+			commons-logging-1.1.1依赖则可选用中央仓库中的GAV坐标 ，版本选择1.1.1
+			<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
+			<dependency>
+			    <groupId>commons-logging</groupId>
+			    <artifactId>commons-logging</artifactId>
+			    <version>1.1.1</version>
+			</dependency>
+
+		3. 复制 AlipayConfig类到新工程中  注意，有编码问题，可以剪切类中的全部内容，删除类后重新创建并粘贴
+
+		4. 将所有的页面复制到webapp目录下
+
+
+p2p-148-支付宝-电脑网站支付产品-参数配置
+	1. 详见RSA2生成文档
+	2. 安装 AlipayDevelopmentAssistant-1.0.4
+	3. 生产公钥和私钥
+		点击生产秘钥  打开秘钥文件路径  剪切到合适的位置即可
+	4. 回到沙箱应用----》RSA2(SHA256)密钥(推荐)  设置 ---》选择公钥
+			根据公钥生成支付宝公钥
+
+			将支付宝公钥的内容复制到本地文件内以便使用
+
+	5. 修改AlipayConfig类中内容
+			 应用ID,您的APPID，收款账号既是您的APPID对应支付宝账号
+			 商户私钥，您的PKCS8格式RSA2私钥
+			 支付宝公钥
+
+			 页面跳转同步通知页面路径  暂时先将工程公网访问地址改成localhost
+			 支付宝网关(默认是生产环境地址)  改为沙箱环境地址 
+
+	6. 配置tomcat
+			上下文根选择// 页面跳转同步通知页面路径中的上下文根
+
+	7. 登录并测试
+
+
+p2p-149-支付宝充值
+	1. 按照微信添加充值记录  
+
+	2. 在p2p-pay工程中添加 alipay依赖
+		在src目录下创建lib目录 将alipay的jar包 放到里面
+
+
+	3. 创建 AlipayController
+			@Controller
+			public class AlipayController {
+
+			    @RequestMapping("/api/alipay")
+			    public String alipay() {
+				return "";
+			    }
+			}	
+
+	4. 将aplipay-sdk-java工程中的AlipayConfig类复制到p2p-pay工程中的相关包下
+			并且将面跳转同步通知页面路径改为public static String return_url = "http://localhost:80/loan/alipayBack/";
+	5. 将alipay.trade.page.pay.jsp中的内容复制到AlipayController中
+			1. 导包
+			2.   //商户订单号，商户网站订单系统中唯一订单号，必填 都是由参数传入 body参数不是必填项
+			3. 去掉+ "\"body\":\""+ body +"\","
+			alipayRequest.setBizContent("{\"out_trade_no\":\""+ out_trade_no +"\","
+			+ "\"total_amount\":\""+ total_amount +"\","
+			+ "\"subject\":\""+ subject +"\","
+			+ "\"body\":\""+ body +"\","
+			+ "\"product_code\":\"FAST_INSTANT_TRADE_PAY\"}");
+	6. 启动pay工程  http://localhost:9090/api/alipay?out_trade_no=20220023420243&total_amount=1000&subject=test 测试，查看控制台
+		生成的结果如下
+			<form name="punchout_form" method="post" action="https://openapi.alipaydev.com/gateway.do?charset=utf-8&method=alipay.trade.page.pay&sign=e9v76bXSQ%2BH2bDtcOAGdT70Kse%2FaJDeaBgQC20MuwmcHjY4t4HOrm4OAhlNkgWj8OMkoZTTWVH99qqx81Lc6pwtEs1%2BQyMJTKTJT3xL2jo79I5gAXexrk6yVSJR9O0f%2FBiYXu6grlZACUaZvkMNqdchKiaGeqF%2BxnixYzEuZP1HRzpBz6K4%2BH8VZEtA1FhcV79YZc%2BzfonbsaWe0PpZoOrnXjFbf7159slYtEf9ciSY3YMcPRDG55H0CX%2BWH%2FdfRSKQc5GvgLW9V9S33%2B0e8wYA6I4UgRl18WwJtfzmuJsCh1FhPXem0%2F4daTJExksyU0xRmNtL12bRIUnuI7FApSQ%3D%3D&return_url=http%3A%2F%2Flocalhost%2Falipay.trade.page.pay-JAVA-UTF-8%2Freturn_url.jsp&notify_url=http%3A%2F%2F%E5%B7%A5%E7%A8%8B%E5%85%AC%E7%BD%91%E8%AE%BF%E9%97%AE%E5%9C%B0%E5%9D%80%2Falipay.trade.page.pay-JAVA-UTF-8%2Fnotify_url.jsp&version=1.0&app_id=2016110200786903&sign_type=RSA2&timestamp=2021-03-18+03%3A37%3A20&alipay_sdk=alipay-sdk-java-dynamicVersionNo&format=json">
+			<input type="hidden" name="biz_content" value="{&quot;out_trade_no&quot;:&quot;20220023420243&quot;,&quot;total_amount&quot;:&quot;1000&quot;,&quot;subject&quot;:&quot;test&quot;,&quot;product_code&quot;:&quot;FAST_INSTANT_TRADE_PAY&quot;}">
+			<input type="submit" value="立即支付" style="display:none" >
+			</form>
+			<script>document.forms[0].submit();</script>
+		将这个结果放到某一个页面，就会自动提交form表单
+
+
+p2p-150-支付宝充值
+		pey工程的Controller最终返回到payToPay页面
+		pay工程新建webapp 
+			创建payToAlipay.jsp
+
+		pom中  
+			1. 添加解析jsp的依赖
+			2. 将jsp编译到META-INF/resources目录下
+				<resources>
+				    <resource>
+					<directory>/src/main/webapp</directory>
+					<targetPath>META-INF/resources</targetPath>
+					<includes>
+					    <include>*.*</include>
+					</includes>
+				    </resource>
+			3. 在pay工程配置视图解析器
+				spring.mvc.view.prefix=/
+				spring.mvc.view.suffix=.jsp
+
+
+p2p-151-支付宝充值
+	在web工程的RechargeRecordController
+		@RequestMapping("/loan/page/toRecharge")方法中最终
+			 model.addAttribute("rechargeNo",rechargeNo);
+			 model.addAttribute("rechargeMoney",rechargeMoney);
+			 model.addAttribute("rechargeDesc","支付宝充值");
+
+		return "p2pToAlipay";
+
+	创建p2pToAlipay.html
+		<!DOCTYPE html>
+		<html lang="en" xmlns:th="http://www.thymeleaf.org">
+		<head>
+		    <meta charset="UTF-8">
+		    <title>p2p调用pay工程的支付请求页面方法</title>
+		</head>
+		<body>
+		<form th:method="post" action="http://localhost:9090/pay/api/alipay">
+		    <input th:type="hidden" th:name="out_trade_no" th:value="${rechargeNo}"/>
+		    <input th:type="hidden" th:name="total_amount" th:value="${rechargeMoney}"/>
+		    <input th:type="hidden" th:name="subject" th:value="${rechargeDesc}"/>
+		</form>
+		<script>document.forms[0].submit();</script>
+		</body>
+		</html>
+
+
+
+p2p-152-支付宝充值-处理通知-1
+	   @RequestMapping(value = "/loan/alipayBack")
+    public String alipayBack(HttpServletRequest request,Model model,
+                             @RequestParam (value = "out_trade_no",required = true) String out_trade_no,
+                             @RequestParam (value = "total_amount",required = true) Double total_amount){
+
+        try {
+            Map<String,String> params = new HashMap<String,String>();
+
+            //获取支付宝GET过来反馈信息
+            Map<String,String[]> requestParams = request.getParameterMap();
+
+            for (Iterator<String> iter = requestParams.keySet().iterator(); iter.hasNext();) {
+                String name = (String) iter.next();
+                String[] values = (String[]) requestParams.get(name);
+                String valueStr = "";
+                for (int i = 0; i < values.length; i++) {
+                    valueStr = (i == values.length - 1) ? valueStr + values[i]
+                            : valueStr + values[i] + ",";
+                }
+                //乱码解决，这段代码在出现乱码时使用
+                valueStr = new String(valueStr.getBytes("ISO-8859-1"), "utf-8");
+                params.put(name, valueStr);
+            }
+
+            //调用SDK验证签名
+            boolean signVerified = AlipaySignature.rsaCheckV1(params, AlipayConfig.alipay_public_key, AlipayConfig.charset, AlipayConfig.sign_type);
+
+            //——请在这里编写您的程序（以下代码仅作参考）——
+            if(signVerified) {
+                Map<String,Object> paramMap = new HashMap<>();
+                paramMap.put("out_trade_no",out_trade_no);
+
+                //调用Pay工程的订单查询接口
+                String jsonString = HttpClientUtils.doPost("http://localhost:9090/pay/api/alipayQuery", paramMap);
+
+                //通过fastjson来解析json格式的字符串
+                JSONObject jsonObject = JSONObject.parseObject(jsonString);
+
+                //获取alipay_trade_query_response所对应的JSON对象
+                JSONObject tradeQueryResponse = jsonObject.getJSONObject("alipay_trade_query_response");
+
+                //获取通信标识code
+                String code = tradeQueryResponse.getString("code");
+
+                //判断通信是否成功
+                if (!StringUtils.equals("10000", code)) {
+                    model.addAttribute("trade_msg","通信异常");
+                    return "toRechargeBack";
+                }
+
+                //获取业务处理结果trade_status
+                String tradeStatus = tradeQueryResponse.getString("trade_status");
+
+                /*交易状态：
+                WAIT_BUYER_PAY（交易创建，等待买家付款）
+                TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
+                TRADE_SUCCESS（交易支付成功）
+                TRADE_FINISHED（交易结束，不可退款）*/
+
+                if (StringUtils.equals("TRADE_CLOSED", tradeStatus)) {
+                    //更新当前充值记录的状态为3交易关闭
+                    RechargeRecord rechargeRecord = new RechargeRecord();
+                    rechargeRecord.setRechargeNo(out_trade_no);
+                    rechargeRecord.setRechargeStatus("2");//交易关闭
+                    int modifyCount = rechargeRecordService.modifyRechargeRecordByRechargeNo(rechargeRecord);
+                    model.addAttribute("trade_msg","交易超时");
+                    return "toRechargeBack";
+
+                }
+
+                if (StringUtils.equals("TRADE_SUCCESS", tradeStatus)) {
+
+                    //再次获取充值记录的详情
+                    RechargeRecord rechargeRecordDetail = rechargeRecordService.queryRechargeRecordByRechargeNo(out_trade_no);
+
+                    if (StringUtils.equals("0", rechargeRecordDetail.getRechargeStatus())) {
+                        //从session中获取用户的信息
+                        User sessionUser = (User) request.getSession().getAttribute(Constants.SESSION_USER);
+
+                        //给用户充值[1.更新帐户的可用余额 2.充值记录的状态更新1充值成功](用户标识,充值金额,充值订单号)
+                        paramMap.put("uid",sessionUser.getId());
+                        paramMap.put("rechargeMoney",total_amount);
+                        paramMap.put("rechargeNo",out_trade_no);
+                        rechargeRecordService.recharge(paramMap);
+
+                    }
+					
+					// 封装参数
+					// 修改账户余额
+
+                }
+
+
+            } else {
+                model.addAttribute("trade_msg","验证签名失败");
+                return "toRechargeBack";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("trade_msg","充值失败");
+            return "toRechargeBack";
+        }
+
+
+        return "redirect:/loan/myCenter";
+    }
+
+	
+
+}
